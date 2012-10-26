@@ -1,3 +1,5 @@
+* Credentials API
+
 The Credentials API is the high-level interface to the credential system. The
 API abstracts away from the low-level details involved in the communication
 between the card, the terminal and the library. It offers a uniform interface
@@ -8,6 +10,7 @@ with the following two basic methods:
    care of the protocol specific communication using the terminal application
    and the cryptographic library. The result of this action is either succes or
    failure.
+
 *Verify* The relying party provides the API with a specification of the
    attributes it wants to verify and the credential they belong to. The API
    then uses the terminal application to request the attributes and a proof of

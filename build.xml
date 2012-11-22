@@ -21,9 +21,7 @@
 
   <target name="compile">
     <mkdir dir="${bin.dir}" />
-    <javac destdir="${bin.dir}" includeantruntime="false">
-       <src path="${src.dir}" />
-       <src path="${test.dir}" />
+    <javac destdir="${bin.dir}" includeantruntime="false" srcdir="${src.dir}">
        <classpath refid="classpath" />
     </javac>
   </target>
@@ -31,7 +29,6 @@
   <target name="archive">
     <jar destfile="${jar.source.dir}/${jar.source.archive}">
       <fileset dir="${src.dir}" />
-      <fileset dir="${test.dir}" />
     </jar>
   </target>
 
@@ -39,7 +36,6 @@
     <jar destfile="${jar.development.dir}/${jar.development.archive}">
       <fileset dir="${bin.dir}" />
       <fileset dir="${src.dir}" />
-      <fileset dir="${test.dir}" />
     </jar>
   </target>
   

@@ -60,7 +60,7 @@ public class CredentialDescription extends ConfigurationParser {
 	 * 
 	 * @return the name of the credential
 	 */
-	String getName() {
+	public String getName() {
 		return name;
 	}
 
@@ -71,7 +71,7 @@ public class CredentialDescription extends ConfigurationParser {
 	 * 
 	 * @return the name of the issuer
 	 */
-	String getIssuerName() {
+	public String getIssuerName() {
 		return issuerName;
 	}
 
@@ -80,14 +80,14 @@ public class CredentialDescription extends ConfigurationParser {
 	 * 
 	 * @return credential description
 	 */
-	String getDescription() {
+	public String getDescription() {
 		return description;
 	}
 	
 	/**
 	 * Get the internal identifier used to denote this credential
 	 */
-	short getId() {
+	public short getId() {
 		return id; 
 	}
 
@@ -96,7 +96,7 @@ public class CredentialDescription extends ConfigurationParser {
 	 * 
 	 * @return list of attributes names
 	 */
-	List<String> getAttributeNames() {
+	public List<String> getAttributeNames() {
 		List<String> ret = new LinkedList<String>();
 		for(AttributeDescription a : attributes) {
 			ret.add(a.getName());
@@ -109,7 +109,7 @@ public class CredentialDescription extends ConfigurationParser {
 	 * 
 	 * @return list of attributes names
 	 */
-	List<String> getAttributeDescriptions() {
+	public List<String> getAttributeDescriptions() {
 		List<String> ret = new LinkedList<String>();
 		for(AttributeDescription a : attributes) {
 			ret.add(a.getDescription());
@@ -122,7 +122,7 @@ public class CredentialDescription extends ConfigurationParser {
 	 * 
 	 * @return list of attributes
 	 */
-	List<AttributeDescription> getAttributes() {
+	public List<AttributeDescription> getAttributes() {
 		return attributes;
 	}
 }

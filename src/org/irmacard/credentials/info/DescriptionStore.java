@@ -88,10 +88,10 @@ public class DescriptionStore {
 	}
 
 	private DescriptionStore() throws InfoException {
-		initialPass();
+		//initialPass();
 	}
 	
-	CredentialDescription getCredentialDescription(short id) {
+	public CredentialDescription getCredentialDescription(short id) {
 		// FIXME for now just return something random
 		try {
 			return new CredentialDescription(id);

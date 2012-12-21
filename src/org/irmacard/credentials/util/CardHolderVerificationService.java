@@ -131,6 +131,11 @@ public class CardHolderVerificationService extends CardService {
 		service.close();
 	}
 
+	public byte[] getATR() 
+	throws CardServiceException {
+		return service.getATR();
+	}
+
     public int verifyPIN() 
     throws CardServiceException {
         queryFeatures();

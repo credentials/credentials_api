@@ -62,7 +62,12 @@ public class CardAuthenticationService extends CardService {
 		service.close();
 	}
 
-    public SecureMessagingWrapper authenticateCard(BigInteger modulus, BigInteger exponent) 
+	public byte[] getATR() 
+	throws CardServiceException {
+		return service.getATR();
+	}
+
+	public SecureMessagingWrapper authenticateCard(BigInteger modulus, BigInteger exponent) 
     throws CardServiceException {
     	SecretKey encKey, macKey; long ssc = 0;
     	BigInteger terminalSeedInt = new BigInteger(modulus.bitLength(), new Random());

@@ -1,6 +1,5 @@
 package org.irmacard.credentials.info;
 
-import java.io.File;
 import java.net.URI;
 import java.util.HashMap;
 
@@ -41,57 +40,17 @@ public class DescriptionStore {
 		
 		return ds;
 	}
-	
-	private void initialPass() throws InfoException {
-		File[] files = new File(CORE_LOCATION).listFiles();
-		for(File f : files) {
-			if(f.isDirectory()) {
-				tryProcessIssuer(f);
-			}
-		}
-	}
-	
-	private void tryProcessIssuer(File f) throws InfoException {
-		// Determine whether we should process this directory.
-		File config = new File(f.toURI().resolve("description.xml"));
-		if(config.exists()) {
-			System.out.println("Config found, now processing");
-			System.out.println(config);
-			
-			// TODO: Somehow parse issuer description
-			
-			// Process credentials issued by this issuer
-			tryProcessCredentials(f);
-			
-			// TODO: Process proof specifications
-		}
-	}
-	
-	private void tryProcessCredentials(File f) throws InfoException {
-		File credentials = new File(f.toURI().resolve("Issues"));
-		if(credentials.exists()) {
-			System.out.println("Credentials exists");
-			for (File c : credentials.listFiles()) {
-				System.out.println("Processing credential: " + c);
-				URI credentialspec = c.toURI().resolve("description.xml");
-				if(c.exists()) {
-					CredentialDescription cd = new CredentialDescription(
-							credentialspec);
-					credentialDescriptions.put(new Integer(cd.getId()), cd);
-					System.out.println(cd);
-				} else {
-					System.out
-							.println("Expected new form credential description");
-				}
-			}
-		}
-	}
 
 	private DescriptionStore() throws InfoException {
-		initialPass();
+		TreeWalker tw = new TreeWalker(CORE_LOCATION, this);
+		tw.parseConfiguration();
 	}
 	
 	public CredentialDescription getCredentialDescription(short id) {
 		return credentialDescriptions.get(new Integer(id));
+	}
+
+	protected void addCredentialDescription(CredentialDescription cd) {
+		credentialDescriptions.put(new Integer(cd.getId()), cd);
 	}
 }

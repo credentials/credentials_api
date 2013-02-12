@@ -45,7 +45,7 @@ public class TreeWalker implements TreeWalkerI {
 			for (File c : credentials.listFiles()) {
 				System.out.println("Processing credential: " + c);
 				URI credentialspec = c.toURI().resolve("description.xml");
-				if(c.exists()) {
+				if((new File(credentialspec)).exists()) {
 					CredentialDescription cd = new CredentialDescription(
 							credentialspec);
 					descriptionStore.addCredentialDescription(cd);

@@ -24,7 +24,7 @@ public class InfoException extends Exception {
 		this.inner = inner;
 	}
 	
-	InfoException(String s) {
+	public InfoException(String s) {
 		super(s);
 		this.inner = null;
 	}

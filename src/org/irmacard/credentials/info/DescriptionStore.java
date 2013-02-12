@@ -30,7 +30,7 @@ public class DescriptionStore {
 	 */
 	public static DescriptionStore getInstance() throws InfoException {
 		if(ds == null) {
-			ds = new DescriptionStore();;
+			ds = new DescriptionStore();
 		}
 		
 		if(CORE_LOCATION == null) {
@@ -88,16 +88,10 @@ public class DescriptionStore {
 	}
 
 	private DescriptionStore() throws InfoException {
-		//initialPass();
+		initialPass();
 	}
 	
 	public CredentialDescription getCredentialDescription(short id) {
-		// FIXME for now just return something random
-		try {
-			return new CredentialDescription(id);
-		} catch (InfoException e) {
-			return null;
-		}
-		//return credentialDescriptions.get(id);
+		return credentialDescriptions.get(new Integer(id));
 	}
 }

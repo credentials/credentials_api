@@ -3,6 +3,8 @@ package org.irmacard.credentials.info;
 import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -13,6 +15,9 @@ public class CredentialDescription extends ConfigurationParser {
 	String name;
 	String issuerName;
 	short id;
+
+	URI path;
+
 	List<AttributeDescription> attributes;
 	
 	/**
@@ -45,6 +50,9 @@ public class CredentialDescription extends ConfigurationParser {
 			attributes
 					.add(new AttributeDescription((Element) attrList.item(i)));
 		}
+		
+		path = file.resolve("./");
+
 	}
 
 	/**
@@ -89,6 +97,13 @@ public class CredentialDescription extends ConfigurationParser {
 	 */
 	public short getId() {
 		return id; 
+	}
+	
+	/**
+	 * Get path for configuration file
+	 */
+	public URI getPath() {
+		return path;
 	}
 
 	/**

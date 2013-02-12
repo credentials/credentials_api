@@ -23,12 +23,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
+import org.irmacard.credentials.info.CredentialDescription;
+import org.irmacard.credentials.info.InfoException;
 import org.irmacard.credentials.keys.PrivateKey;
 import org.irmacard.credentials.spec.IssueSpecification;
 import org.irmacard.credentials.spec.VerifySpecification;
 import org.irmacard.credentials.util.LogEntry;
 
 import net.sourceforge.scuba.smartcards.CardService;
+import net.sourceforge.scuba.smartcards.CardServiceException;
 
 public abstract class BaseCredentials implements Credentials {
 	protected CardService cs = null;
@@ -50,23 +53,24 @@ public abstract class BaseCredentials implements Credentials {
 	 * Get a list of credentials available on the card.
 	 * 
 	 * @return list of credential identifiers.
+	 * @throws CardServiceException
+	 * @throws InfoException 
 	 */
-	public List<Integer> getCredentials() {
-		List<Integer> list = new Vector<Integer>();
+	public List<CredentialDescription> getCredentials() throws CardServiceException, InfoException {
+		List<CredentialDescription> list = new Vector<CredentialDescription>();
 		
 		return list;
 	}
-	
+
 	/**
 	 * Get the attribute values stored on the card for the given credential.
 	 *  
-	 * @param credential identifier.
+	 * @param credential description used as identifier.
 	 * @return attributes for the given credential.
+	 * @throws CardServiceException 
 	 */
-	public Attributes getAttributes(short credentialID) {
-		Attributes attributes = new Attributes();
-		
-		return attributes;
+	public Attributes getAttributes(CredentialDescription cd) throws CardServiceException {
+		return null;
 	}
 	
 	/**

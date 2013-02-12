@@ -8,13 +8,15 @@ import java.util.HashMap;
  */
 public class DescriptionStore {
 	static URI CORE_LOCATION;
+	static TreeWalkerI treeWalker;
+	
 	static DescriptionStore ds;
 	
 	HashMap<Integer,CredentialDescription> credentialDescriptions = new HashMap<Integer, CredentialDescription>();
 
 	/**
 	 * Define the CoreLocation. This has to be set before using the 
-	 * DescriptionStore.
+	 * DescriptionStore or define a TreeWalker instead.
 	 * @param coreLocation Location of configuration files.
 	 */
 	public static void setCoreLocation(URI coreLocation) {
@@ -22,13 +24,23 @@ public class DescriptionStore {
 	}
 	
 	/**
+	 * Define the TreeWalker. This allows crawling more difficult storage systems,
+	 * like Android's. This has to be set before using the DescriptionStore or define
+	 * a coreLocation instead.
+	 * @param treeWalker
+	 */
+	public static void setTreeWalker(TreeWalkerI treeWalker) {
+		DescriptionStore.treeWalker = treeWalker;
+	}
+
+	/**
 	 * Get DescriptionStore instance
 	 * 
 	 * @return The DescriptionStore instance
 	 * @throws Exception if CoreLocation has not been set
 	 */
 	public static DescriptionStore getInstance() throws InfoException {		
-		if(CORE_LOCATION == null) {
+		if(CORE_LOCATION == null && treeWalker == null) {
 			// TODO: Improve exception type
 			throw new InfoException(
 					"Please set CoreLocation before using the DescriptionStore");
@@ -42,8 +54,11 @@ public class DescriptionStore {
 	}
 
 	private DescriptionStore() throws InfoException {
-		TreeWalker tw = new TreeWalker(CORE_LOCATION, this);
-		tw.parseConfiguration();
+		if(CORE_LOCATION != null) {
+			treeWalker = new TreeWalker(CORE_LOCATION);
+		}
+
+		treeWalker.parseConfiguration(this);
 	}
 	
 	public CredentialDescription getCredentialDescription(short id) {

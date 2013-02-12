@@ -3,18 +3,19 @@ package org.irmacard.credentials.info;
 import java.io.File;
 import java.net.URI;
 
-public class TreeWalker {
-	final URI CORE_LOCATION;
-	final DescriptionStore descriptionStore;
+public class TreeWalker implements TreeWalkerI {
+	URI CORE_LOCATION;
+	DescriptionStore descriptionStore;
 	
-	public TreeWalker(URI coreLocation, DescriptionStore ds) {
+	public TreeWalker(URI coreLocation) {
 		CORE_LOCATION = coreLocation;
-		descriptionStore = ds;
 	}
-	
-	public void parseConfiguration() throws InfoException {
+
+	public void parseConfiguration(DescriptionStore descriptionStore)
+			throws InfoException {
+		this.descriptionStore = descriptionStore;
 		File[] files = new File(CORE_LOCATION).listFiles();
-		for(File f : files) {
+	for(File f : files) {
 			if(f.isDirectory()) {
 				tryProcessIssuer(f);
 			}

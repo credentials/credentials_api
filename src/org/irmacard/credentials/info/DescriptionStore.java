@@ -13,6 +13,7 @@ public class DescriptionStore {
 	static DescriptionStore ds;
 	
 	HashMap<Integer,CredentialDescription> credentialDescriptions = new HashMap<Integer, CredentialDescription>();
+	HashMap<String,IssuerDescription> issuerDescriptions = new HashMap<String, IssuerDescription>();
 
 	/**
 	 * Define the CoreLocation. This has to be set before using the 
@@ -65,7 +66,15 @@ public class DescriptionStore {
 		return credentialDescriptions.get(new Integer(id));
 	}
 
-	protected void addCredentialDescription(CredentialDescription cd) {
+	public void addCredentialDescription(CredentialDescription cd) {
 		credentialDescriptions.put(new Integer(cd.getId()), cd);
+	}
+	
+	public IssuerDescription getIssuerDescription(String name) {
+		return issuerDescriptions.get(name);
+	}
+	
+	public void addIssuerDescription(IssuerDescription id) {
+		issuerDescriptions.put(id.getID(), id);
 	}
 }

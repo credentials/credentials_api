@@ -36,10 +36,18 @@ public class TestBasicParse {
 		if(cd == null) {
 			fail("Credential description not found");
 		}
-		if(!cd.getIssuerName().equals("MijnOverheid")) {
-			System.out.println(cd.getIssuerName());
+		if(!cd.getIssuerID().equals("MijnOverheid")) {
+			System.out.println(cd.getIssuerID());
 			fail("Issuer name incorrect");
 		}
+	}
+	
+	@Test
+	public void retrieveCredentialDescription() throws InfoException {
+		System.out.println("Retrieve credential test");
+		CredentialDescription cd = DescriptionStore.getInstance().getCredentialDescription((short) 10);
+		System.out.println(DescriptionStore.getInstance().getIssuerDescription("RU"));
+		System.out.println(cd.getIssuerDescription());
 	}
 
 }

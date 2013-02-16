@@ -37,11 +37,8 @@ abstract public class ConfigurationParser {
 			throw new InfoException(e, "Cannot read input file " + file.toString() + ".");
 		}
 		
-		
-		InputSource inputSource = new InputSource(inputStream);
-
 		try {
-			return db.parse(inputSource);
+			return internalParse(inputStream);
 		} catch (SAXException e) {
 			throw new InfoException(e, "Parsing configuration file "
 					+ file.toString() + " failed.");
@@ -49,6 +46,20 @@ abstract public class ConfigurationParser {
 			throw new InfoException(e, "Cannot read configuration file "
 					+ file.toString() + ".");
 		}
+	}
+
+	protected Document parse(InputStream inputStream) throws InfoException{
+		try {
+			return internalParse(inputStream);
+		} catch (SAXException e) {
+			throw new InfoException(e, "Parsing configuration file failed.");
+		} catch (IOException e) {
+			throw new InfoException(e, "Cannot read configuration file.");
+		}
+	}
+	
+	private Document internalParse(InputStream inputStream) throws SAXException, IOException {
+		return db.parse(inputStream);
 	}
 	
 	protected String getFirstTagText(Document d, String tag) {

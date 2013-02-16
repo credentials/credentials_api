@@ -19,7 +19,7 @@ public class InfoException extends Exception {
 	 */
 	private static final long serialVersionUID = 1812980213957824660L;
 
-	InfoException(Exception inner, String s) {
+	public InfoException(Exception inner, String s) {
 		super(s);
 		this.inner = inner;
 	}
@@ -27,5 +27,9 @@ public class InfoException extends Exception {
 	public InfoException(String s) {
 		super(s);
 		this.inner = null;
+	}
+	
+	public Exception getInner() {
+		return inner;
 	}
 }

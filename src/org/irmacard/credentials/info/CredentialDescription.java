@@ -1,5 +1,6 @@
 package org.irmacard.credentials.info;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,12 +12,15 @@ import org.w3c.dom.NodeList;
 public class CredentialDescription extends ConfigurationParser {
 	String description;
 	String name;
-	String issuerName;
+	String shortName;
+	String issuerID;
+	String credentialID;
 	short id;
 
 	URI path;
 
 	List<AttributeDescription> attributes;
+	private IssuerDescription issuerDescription;
 	
 	/**
 	 * FIXME: Constructor only for testing purposes
@@ -25,7 +29,7 @@ public class CredentialDescription extends ConfigurationParser {
 	public CredentialDescription(short id) throws InfoException{
 		description = "A Description";
 		name = "CoolName";
-		issuerName = "CoolIssuer";
+		issuerID = "CoolIssuer";
 		this.id = id;
 		
 		attributes = new LinkedList<AttributeDescription>();
@@ -35,10 +39,21 @@ public class CredentialDescription extends ConfigurationParser {
 	public CredentialDescription(URI file) throws InfoException {
 		super();
 		Document d = parse(file);
-		
+		init(d);
+	}
+	
+	public CredentialDescription(InputStream stream) throws InfoException {
+		super();
+		Document d = parse(stream);
+		init(d);
+	}
+	
+	private void init(Document d) {
 		description = getFirstTagText(d, "Description");
 		name = getFirstTagText(d, "Name");
-		issuerName = getFirstTagText(d, "IssuerName");
+		shortName = getFirstTagText(d, "ShortName");
+		issuerID = getFirstTagText(d, "IssuerID");
+		credentialID = getFirstTagText(d, "CredentialID");
 		id = (short) Integer.parseInt(getFirstTagText(d, "Id"));
 		
 		NodeList attrList = ((Element) d.getElementsByTagName("Attributes")
@@ -49,8 +64,8 @@ public class CredentialDescription extends ConfigurationParser {
 					.add(new AttributeDescription((Element) attrList.item(i)));
 		}
 		
-		path = file.resolve("./");
-
+		// FIXME: repair later, needed by IdemixCredentials.getAttributes
+		// path = file.resolve("./");
 	}
 
 	/**
@@ -69,6 +84,10 @@ public class CredentialDescription extends ConfigurationParser {
 	public String getName() {
 		return name;
 	}
+	
+	public String getShortName() {
+		return shortName;
+	}
 
 	/**
 	 * Get the name of the issuer. For example this can be "Surfnet"
@@ -77,8 +96,16 @@ public class CredentialDescription extends ConfigurationParser {
 	 * 
 	 * @return the name of the issuer
 	 */
-	public String getIssuerName() {
-		return issuerName;
+	public String getIssuerID() {
+		return issuerID;
+	}
+	
+	/**
+	 * Get the name of this credential in the directory structure
+	 * @return
+	 */
+	public String getCredentialID() {
+		return credentialID;
 	}
 
 	/**
@@ -137,5 +164,17 @@ public class CredentialDescription extends ConfigurationParser {
 	 */
 	public List<AttributeDescription> getAttributes() {
 		return attributes;
+	}
+	
+	public IssuerDescription getIssuerDescription() {
+		if(issuerDescription == null) {
+			try {
+				issuerDescription = DescriptionStore.getInstance().getIssuerDescription(issuerID);
+			} catch (InfoException e) {
+				// FIXME: for now ignore errors due to missing DescriptionStore
+				e.printStackTrace();
+			}
+		}
+		return issuerDescription;
 	}
 }

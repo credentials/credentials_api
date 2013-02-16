@@ -10,7 +10,7 @@ public class AttributeDescription {
 		name = ((Element) e.getElementsByTagName("Name").item(0)).getTextContent();
 		description = ((Element) e.getElementsByTagName("Description").item(0)).getTextContent();
 	}
-
+	
 	/**
 	 * FIXME: constructor for testing
 	 */
@@ -18,6 +18,11 @@ public class AttributeDescription {
 	public AttributeDescription() {
 		name = "CoolAttr";
 		description = "CoolAttr description";
+	}
+
+	public AttributeDescription(String name, String description) {
+		this.name = name;
+		this.description = description;
 	}
 
 	public String getName() {

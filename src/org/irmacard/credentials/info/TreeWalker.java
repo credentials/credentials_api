@@ -1,14 +1,32 @@
 package org.irmacard.credentials.info;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 
 public class TreeWalker implements TreeWalkerI {
 	URI CORE_LOCATION;
 	DescriptionStore descriptionStore;
+	IssuerDescription currentIssuer;
 	
 	public TreeWalker(URI coreLocation) {
 		CORE_LOCATION = coreLocation;
+	}
+	
+	public InputStream retrieveFile(URI path) throws InfoException {
+		try {
+			return CORE_LOCATION.resolve(path).toURL().openStream();
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			throw new InfoException(e, "Tried to read file " + path);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			throw new InfoException(e, "Tried to read file " + path);
+		}
 	}
 
 	public void parseConfiguration(DescriptionStore descriptionStore)
@@ -29,7 +47,9 @@ public class TreeWalker implements TreeWalkerI {
 			System.out.println("Config found, now processing");
 			System.out.println(config);
 			
-			// TODO: Somehow parse issuer description
+			currentIssuer = new IssuerDescription(config.toURI());
+			System.out.println("Got Issuer: " + currentIssuer);
+			descriptionStore.addIssuerDescription(currentIssuer);
 			
 			// Process credentials issued by this issuer
 			tryProcessCredentials(f);

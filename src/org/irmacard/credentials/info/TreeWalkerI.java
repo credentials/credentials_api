@@ -1,5 +1,8 @@
 package org.irmacard.credentials.info;
 
+import java.io.InputStream;
+import java.net.URI;
+
 public interface TreeWalkerI {
 
 	/**
@@ -9,4 +12,5 @@ public interface TreeWalkerI {
 	 */
 	public void parseConfiguration(DescriptionStore ds) throws InfoException;
 
+	public InputStream retrieveFile(URI path) throws InfoException;
 }

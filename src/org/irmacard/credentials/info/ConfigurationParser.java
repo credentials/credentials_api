@@ -63,6 +63,6 @@ abstract public class ConfigurationParser {
 	}
 	
 	protected String getFirstTagText(Document d, String tag) {
-		return d.getElementsByTagName(tag).item(0).getTextContent();
+		return d.getElementsByTagName(tag).item(0).getTextContent().trim();
 	}
 }

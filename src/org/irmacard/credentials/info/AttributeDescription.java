@@ -1,8 +1,11 @@
 package org.irmacard.credentials.info;
 
+import java.io.Serializable;
+
 import org.w3c.dom.Element;
 
-public class AttributeDescription {
+public class AttributeDescription implements Serializable{
+	private static final long serialVersionUID = 4609118645897084209L;
 	String name;
 	String description;
 

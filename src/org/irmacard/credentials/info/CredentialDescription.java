@@ -1,7 +1,9 @@
 package org.irmacard.credentials.info;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -9,7 +11,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-public class CredentialDescription extends ConfigurationParser {
+public class CredentialDescription extends ConfigurationParser implements Serializable {
+	private static final long serialVersionUID = -8465573145896355885L;
 	String description;
 	String name;
 	String shortName;
@@ -19,7 +22,7 @@ public class CredentialDescription extends ConfigurationParser {
 
 	URI path;
 
-	List<AttributeDescription> attributes;
+	ArrayList<AttributeDescription> attributes;
 	private IssuerDescription issuerDescription;
 	
 	/**
@@ -32,7 +35,7 @@ public class CredentialDescription extends ConfigurationParser {
 		issuerID = "CoolIssuer";
 		this.id = id;
 		
-		attributes = new LinkedList<AttributeDescription>();
+		attributes = new ArrayList<AttributeDescription>();
 		attributes.add(new AttributeDescription());
 	}
 
@@ -58,7 +61,7 @@ public class CredentialDescription extends ConfigurationParser {
 		
 		NodeList attrList = ((Element) d.getElementsByTagName("Attributes")
 				.item(0)).getElementsByTagName("Attribute");
-		attributes = new LinkedList<AttributeDescription>();
+		attributes = new ArrayList<AttributeDescription>();
 		for (int i = 0; i < attrList.getLength(); i++) {
 			attributes
 					.add(new AttributeDescription((Element) attrList.item(i)));

@@ -1,10 +1,12 @@
 package org.irmacard.credentials.info;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.net.URI;
 import org.w3c.dom.Document;
 
-public class IssuerDescription extends ConfigurationParser {
+public class IssuerDescription extends ConfigurationParser implements Serializable {
+	private static final long serialVersionUID = 1640325096236188409L;
 	String name;
 	String id;
 	String contactAddress;

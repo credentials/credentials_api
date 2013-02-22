@@ -23,15 +23,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
+import net.sourceforge.scuba.smartcards.CardService;
+import net.sourceforge.scuba.smartcards.CardServiceException;
+
 import org.irmacard.credentials.info.CredentialDescription;
 import org.irmacard.credentials.info.InfoException;
 import org.irmacard.credentials.keys.PrivateKey;
 import org.irmacard.credentials.spec.IssueSpecification;
 import org.irmacard.credentials.spec.VerifySpecification;
 import org.irmacard.credentials.util.LogEntry;
-
-import net.sourceforge.scuba.smartcards.CardService;
-import net.sourceforge.scuba.smartcards.CardServiceException;
 
 public abstract class BaseCredentials implements Credentials {
 	protected CardService cs = null;

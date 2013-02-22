@@ -26,7 +26,6 @@ import java.util.List;
 import net.sourceforge.scuba.smartcards.ProtocolCommand;
 import net.sourceforge.scuba.smartcards.ProtocolResponses;
 
-import org.irmacard.credentials.Nonce;
 import org.irmacard.credentials.keys.PrivateKey;
 import org.irmacard.credentials.spec.IssueSpecification;
 import org.irmacard.credentials.spec.VerifySpecification;

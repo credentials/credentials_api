@@ -37,13 +37,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 
-import net.sourceforge.scuba.util.Hex;
-
 import net.sourceforge.scuba.smartcards.CardService;
 import net.sourceforge.scuba.smartcards.CardServiceException;
 import net.sourceforge.scuba.smartcards.CommandAPDU;
 import net.sourceforge.scuba.smartcards.ResponseAPDU;
 import net.sourceforge.scuba.smartcards.TerminalCardService;
+import net.sourceforge.scuba.util.Hex;
 
 public class CardHolderVerificationService extends CardService {
 

@@ -36,14 +36,13 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
-import service.ProtocolCommand;
-import service.ProtocolCommands;
-import service.ProtocolResponse;
-import service.ProtocolResponses;
-
 import net.sourceforge.scuba.smartcards.APDUWrapper;
 import net.sourceforge.scuba.smartcards.CommandAPDU;
 import net.sourceforge.scuba.smartcards.ISO7816;
+import net.sourceforge.scuba.smartcards.ProtocolCommand;
+import net.sourceforge.scuba.smartcards.ProtocolCommands;
+import net.sourceforge.scuba.smartcards.ProtocolResponse;
+import net.sourceforge.scuba.smartcards.ProtocolResponses;
 import net.sourceforge.scuba.smartcards.ResponseAPDU;
 import net.sourceforge.scuba.tlv.TLVUtil;
 import net.sourceforge.scuba.util.Hex;

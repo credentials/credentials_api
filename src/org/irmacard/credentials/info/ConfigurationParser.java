@@ -9,7 +9,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 abstract public class ConfigurationParser {
@@ -37,11 +36,8 @@ abstract public class ConfigurationParser {
 			throw new InfoException(e, "Cannot read input file " + file.toString() + ".");
 		}
 		
-		
-		InputSource inputSource = new InputSource(inputStream);
-
 		try {
-			return db.parse(inputSource);
+			return internalParse(inputStream);
 		} catch (SAXException e) {
 			throw new InfoException(e, "Parsing configuration file "
 					+ file.toString() + " failed.");
@@ -50,8 +46,22 @@ abstract public class ConfigurationParser {
 					+ file.toString() + ".");
 		}
 	}
+
+	protected Document parse(InputStream inputStream) throws InfoException{
+		try {
+			return internalParse(inputStream);
+		} catch (SAXException e) {
+			throw new InfoException(e, "Parsing configuration file failed.");
+		} catch (IOException e) {
+			throw new InfoException(e, "Cannot read configuration file.");
+		}
+	}
+	
+	private Document internalParse(InputStream inputStream) throws SAXException, IOException {
+		return db.parse(inputStream);
+	}
 	
 	protected String getFirstTagText(Document d, String tag) {
-		return d.getElementsByTagName(tag).item(0).getTextContent();
+		return d.getElementsByTagName(tag).item(0).getTextContent().trim();
 	}
 }

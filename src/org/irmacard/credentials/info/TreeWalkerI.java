@@ -1,5 +1,5 @@
 /**
- * InfoException.java
+ * TreeWalkerI.java
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,36 +19,25 @@
 
 package org.irmacard.credentials.info;
 
-/**
- * Because I got tired of passing around exceptions all the time
- * Probably Pim has a nice fix for this already in place somewhere,
- * but in the mean time, this'll do.
- * 
- * @author Wouter Lueks
- *
- */
-public class InfoException extends Exception {
-	/** 
-	 * Actual exception that was initially thrown. 
-	 * */
-	Exception inner;
+import java.io.InputStream;
+import java.net.URI;
+
+public interface TreeWalkerI {
 
 	/**
-	 * 
+	 * This method will walk the configuration and store the results back
+	 * into the DescriptionStore 
+	 * @throws InfoException
 	 */
-	private static final long serialVersionUID = 1812980213957824660L;
+	public void parseConfiguration(DescriptionStore ds) throws InfoException;
 
-	public InfoException(Exception inner, String s) {
-		super(s);
-		this.inner = inner;
-	}
-	
-	public InfoException(String s) {
-		super(s);
-		this.inner = null;
-	}
-	
-	public Exception getInner() {
-		return inner;
-	}
+	/**
+	 * Retrieve an InputStream for the given path in the configuration tree. Note that the
+	 * path should be relative. The specific TreeWalker implementations should ensure that
+	 * this path is properly referenced.
+	 * @param path The relative path of the configuration file
+	 * @return an InputStream of the configuration file.
+	 * @throws InfoException
+	 */
+	public InputStream retrieveFile(URI path) throws InfoException;
 }

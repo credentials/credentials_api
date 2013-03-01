@@ -20,6 +20,7 @@
 
 package org.irmacard.credentials;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -28,8 +29,9 @@ import java.util.Set;
  * A generic container class for attributes. Possibly this will just manage 
  * attribute id and value pairs.
  */
-public class Attributes {
-
+public class Attributes implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	// TODO: provide an implementation for attribute storage.
 	private Map<String, byte[]> attributes;
 	
@@ -53,5 +55,14 @@ public class Attributes {
 		for(String k : attributes.keySet() ) {
 			System.out.println(k + ": " + new String(get(k)));
 		}
+	}
+	
+	public String toString() {
+		String res = "[";
+		for(String k : attributes.keySet() ) {
+			res += k + ": " + new String(get(k)) + ", ";
+		}
+		res += "]";
+		return res;
 	}
 }

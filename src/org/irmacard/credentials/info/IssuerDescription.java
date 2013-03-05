@@ -26,11 +26,11 @@ import org.w3c.dom.Document;
 
 public class IssuerDescription extends ConfigurationParser implements Serializable {
 	private static final long serialVersionUID = 1640325096236188409L;
-	String name;
-	String id;
-	String contactAddress;
-	String contactEMail;
-	String baseURL;
+	private String name;
+	private String id;
+	private String contactAddress;
+	private String contactEMail;
+	private String baseURL;
 	
 	/**
 	 * Full human readable name of the issuer. For example this could be "Radboud University".

@@ -47,7 +47,7 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 	 * The identifier of the verifier, this corresponds to the directory name in
 	 * the configuration structures, and can for example be "RU" or "Surfnet".
 	 */
-	String getVerifierID() {
+	public String getVerifierID() {
 		return verifierID;
 	}
 
@@ -56,7 +56,7 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 	 * directory name in the configuration structures, and can for example be
 	 * "rootID".
 	 */
-	String getVerificationID() {
+	public String getVerificationID() {
 		return verificationID;
 	}
 
@@ -64,7 +64,7 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 	 * The identifier of the issuer, this corresponds to the directory name in
 	 * the configuration structures, and can for example be "RU" or "Surfnet".
 	 */
-	String getIssuerID() {
+	public String getIssuerID() {
 		return issuerID;
 	}
 
@@ -73,7 +73,7 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 	 * directory name in the configuration structures, and can for example be
 	 * "studentCard" or "root".
 	 */
-	String getCredentialID() {
+	public String getCredentialID() {
 		return credentialID;
 	}
 
@@ -81,21 +81,21 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 	 * Name of the Verification Specification, this could be "Student Card All" or
 	 * some other human readable string.
 	 */
-	String getName() {
+	public String getName() {
 		return name;
 	}
 
 	/**
 	 * Short description of what this Verification Specification will actually verify.
 	 */
-	String getDescription() {
+	public String getDescription() {
 		return description;
 	}
 
 	/**
 	 * Short identifier used in the backend to identify this VerificationDescription
 	 */
-	short getID() {
+	public short getID() {
 		return id;
 	}
 

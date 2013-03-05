@@ -8,6 +8,7 @@ import java.net.URI;
 import org.irmacard.credentials.info.CredentialDescription;
 import org.irmacard.credentials.info.DescriptionStore;
 import org.irmacard.credentials.info.InfoException;
+import org.irmacard.credentials.info.VerificationDescription;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -17,11 +18,19 @@ public class TestBasicParse {
 			"irma_configuration/");
 	URI spec = core.resolve(
 			"Surfnet/Issues/root/description.xml");
+	URI vspec = core.resolve(
+			"RU/Verifies/rootID/description.xml");
 	
 	@Test
 	public void parseConfig () throws InfoException {
 		CredentialDescription cd = new CredentialDescription(spec);
 		System.out.println(cd);
+	}
+
+	@Test
+	public void parseVerifierConfig() throws InfoException {
+		VerificationDescription vd = new VerificationDescription(vspec);
+		System.out.println(vd);
 	}
 	
 	@Test

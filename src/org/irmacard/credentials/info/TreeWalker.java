@@ -71,7 +71,8 @@ public class TreeWalker implements TreeWalkerI {
 			// Process credentials issued by this issuer
 			tryProcessCredentials(f);
 			
-			// TODO: Process proof specifications
+			// Process verification descriptions
+			tryProcessVerifications(f);
 		}
 	}
 	
@@ -95,5 +96,23 @@ public class TreeWalker implements TreeWalkerI {
 		}
 	}
 
-
+	private void tryProcessVerifications(File f) throws InfoException {
+		File verifications = new File(f.toURI().resolve("Verifies"));
+		if(verifications.exists()) {
+			System.out.println("Proof specifications exists");
+			for (File v : verifications.listFiles()) {
+				System.out.println("Processing proofSpec: " + v);
+				URI verification = v.toURI().resolve("description.xml");
+				if((new File(verification)).exists()) {
+					VerificationDescription vd = new VerificationDescription(
+							verification);
+					descriptionStore.addVerificationDescription(vd);
+					System.out.println(vd);
+				} else {
+					System.out
+							.println("Expected new form verification description");
+				}
+			}
+		}
+	}
 }

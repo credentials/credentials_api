@@ -33,6 +33,7 @@ public class DescriptionStore {
 	
 	HashMap<Integer,CredentialDescription> credentialDescriptions = new HashMap<Integer, CredentialDescription>();
 	HashMap<String,IssuerDescription> issuerDescriptions = new HashMap<String, IssuerDescription>();
+	HashMap<Integer,VerificationDescription> verificationDescriptions = new HashMap<Integer, VerificationDescription>();
 
 	/**
 	 * Define the CoreLocation. This has to be set before using the 
@@ -85,6 +86,30 @@ public class DescriptionStore {
 		return credentialDescriptions.get(new Integer(id));
 	}
 
+	public CredentialDescription getCredentialDescriptionByName(String issuer,
+			String credID) {
+		for (CredentialDescription cd : credentialDescriptions.values()) {
+			if (cd.getIssuerID().equals(issuer)
+					&& cd.getCredentialID().equals(credID)) {
+				return cd;
+			}
+		}
+
+		return null;
+	}
+
+	public VerificationDescription getVerificationDescriptionByName(
+			String verifier, String verificationID) {
+		for (VerificationDescription vd : verificationDescriptions.values()) {
+			if (vd.getVerifierID().equals(verifier)
+					&& vd.getVerificationID().equals(verificationID)) {
+				return vd;
+			}
+		}
+
+		return null;
+	}
+
 	public void addCredentialDescription(CredentialDescription cd) {
 		credentialDescriptions.put(new Integer(cd.getId()), cd);
 	}
@@ -95,5 +120,9 @@ public class DescriptionStore {
 	
 	public void addIssuerDescription(IssuerDescription id) {
 		issuerDescriptions.put(id.getID(), id);
+	}
+
+	public void addVerificationDescription(VerificationDescription vd) {
+		verificationDescriptions.put(new Integer(vd.getID()), vd);
 	}
 }

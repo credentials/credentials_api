@@ -43,6 +43,9 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 
 	private HashMap<String,Boolean> attributeDisclosed;
 
+	private CredentialDescription credentialDescription;
+	private IssuerDescription issuerDescription;
+
 	/**
 	 * The identifier of the verifier, this corresponds to the directory name in
 	 * the configuration structures, and can for example be "RU" or "Surfnet".
@@ -179,5 +182,37 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 			}
 		}
 		return ret + "]";
+	}
+
+	/**
+	 * Get the credential description. If necessary it is loaded from the DescriptionStore.
+	 * @return the issuer description.
+	 */
+	public CredentialDescription getCredentialDescription() {
+		if(credentialDescription == null) {
+			try {
+				credentialDescription = DescriptionStore.getInstance().getCredentialDescriptionByName(issuerID, credentialID);
+			} catch (InfoException e) {
+				// FIXME: for now ignore errors due to missing DescriptionStore
+				e.printStackTrace();
+			}
+		}
+		return credentialDescription;
+	}
+
+	/**
+	 * Get the issuer description. If necessary it is loaded from the DescriptionStore.
+	 * @return the issuer description.
+	 */
+	public IssuerDescription getIssuerDescription() {
+		if(issuerDescription == null) {
+			try {
+				issuerDescription = DescriptionStore.getInstance().getIssuerDescription(issuerID);
+			} catch (InfoException e) {
+				// FIXME: for now ignore errors due to missing DescriptionStore
+				e.printStackTrace();
+			}
+		}
+		return issuerDescription;
 	}
 }

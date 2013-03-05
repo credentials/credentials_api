@@ -22,13 +22,10 @@ package org.irmacard.credentials.info;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class VerificationDescription extends ConfigurationParser implements Serializable {
@@ -42,6 +39,7 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 
 	private String name;
 	private String description;
+	private short id;
 
 	private HashMap<String,Boolean> attributeDisclosed;
 
@@ -95,6 +93,13 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 	}
 
 	/**
+	 * Short identifier used in the backend to identify this VerificationDescription
+	 */
+	short getID() {
+		return id;
+	}
+
+	/**
 	 * Create new credential description from file
 	 * @param file Input XML file.
 	 * @throws InfoException
@@ -118,6 +123,7 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 
 	private void init(Document d) {
 		name = getFirstTagText(d, "Name");
+		id = (short) Integer.parseInt(getFirstTagText(d, "Id"));
 
 		issuerID = getFirstTagText(d, "IssuerID");
 		credentialID = getFirstTagText(d, "CredentialID");
@@ -158,7 +164,7 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 	}
 
 	public String toString() {
-		return "VSpec: " + verifierID + "/" + verificationID + " issued by "
+		return "VSpec: " + verifierID + "/" + verificationID + " (" + id + ") issued by "
 				+ issuerID + " as " + credentialID + " || " + disclosedSpecString();
 	}
 

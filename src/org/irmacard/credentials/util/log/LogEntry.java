@@ -15,41 +15,30 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  * 
  * Copyright (C) Pim Vullers, Radboud University Nijmegen, October 2012.
+ * Copyright (C) Wouter Lueks, Radboud University Nijmegen, March 2013.
  */
 
-package org.irmacard.credentials.util;
+package org.irmacard.credentials.util.log;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import java.util.Vector;
+import org.irmacard.credentials.info.CredentialDescription;
 
 public class LogEntry {
-
-	public enum Action {
-		ISSUE,
-		VERIFY
-	}
-	
 	private Date timestamp;
-	private Action action;
-	private short credential;
-	private short disclose;
-	
+	private CredentialDescription credential;
+
 	/**
 	 * Create a new log entry for a card transaction.
 	 * 
 	 * @param timestamp at which the transaction occurred.
-	 * @param action that was performed.
-	 * @param id of the credential involved.
-	 * @param selection of attributes disclosed.
+	 * @param credential the credential that was operated upon
 	 */
-	public LogEntry(Date timestamp, Action action, short id, short selection) {
+	public LogEntry(Date timestamp, CredentialDescription credential) {
 		this.timestamp = timestamp;
-		this.action = action;
-		this.credential = id;
-		this.disclose = selection;
+		this.credential = credential;
 	}
-	
+
 	/**
 	 * Get the date and time at which this transaction occurred.
 	 * 
@@ -58,39 +47,22 @@ public class LogEntry {
 	public Date getTimestamp() {
 		return timestamp;
 	}
-	
-	/**
-	 * Get the action performed during this transaction
-	 * @return
-	 */
-	public Action getAction() {
-		return action;
-	}
-	
+
 	/**
 	 * Get the credential involved in this transaction.
 	 * 
 	 * @return identifier of the credential.
 	 */
-	public short getCredential() {
+	public CredentialDescription getCredential() {
 		return credential;
 	}
-	
-	/**
-	 * Get the list of attributes selected for disclosure during this 
-	 * transaction.
-	 * 
-	 * @return list of attribute indices.
-	 */
-	public List<Integer> getSelection() {
-		List<Integer> selection = new Vector<Integer>();
-		
-		for (int i = 0; i < 16; i++) {
-			if ((disclose & (1 << i)) != 0) {
-				selection.add(i);
-			}
-		}
-		
-		return selection;
+
+	public String toString() {
+		return baseString();
+	}
+
+	protected String baseString() {
+		return credential.getName() + "(" + credential.getId()
+				+ ") on " + (new SimpleDateFormat()).format(timestamp);
 	}
 }

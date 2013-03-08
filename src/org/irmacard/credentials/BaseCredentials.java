@@ -31,7 +31,7 @@ import org.irmacard.credentials.info.InfoException;
 import org.irmacard.credentials.keys.PrivateKey;
 import org.irmacard.credentials.spec.IssueSpecification;
 import org.irmacard.credentials.spec.VerifySpecification;
-import org.irmacard.credentials.util.LogEntry;
+import org.irmacard.credentials.util.log.LogEntry;
 
 public abstract class BaseCredentials implements Credentials {
 	protected CardService cs = null;
@@ -77,8 +77,10 @@ public abstract class BaseCredentials implements Credentials {
 	 * Get the transaction log from the card.
 	 * 
 	 * @return list of log entries from the card.
+	 * @throws CardServiceException 
+	 * @throws InfoException 
 	 */
-	public List<LogEntry> getLog() {
+	public List<LogEntry> getLog() throws CardServiceException, InfoException {
 		List<LogEntry> log = new Vector<LogEntry>();
 		
 		return log;

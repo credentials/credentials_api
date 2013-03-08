@@ -25,8 +25,8 @@ import org.w3c.dom.Element;
 
 public class AttributeDescription implements Serializable{
 	private static final long serialVersionUID = 4609118645897084209L;
-	String name;
-	String description;
+	private String name;
+	private String description;
 
 	AttributeDescription(Element e) {
 		name = ((Element) e.getElementsByTagName("Name").item(0)).getTextContent();

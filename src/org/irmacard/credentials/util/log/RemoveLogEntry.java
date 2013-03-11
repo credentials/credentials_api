@@ -24,6 +24,7 @@ import java.util.Date;
 import org.irmacard.credentials.info.CredentialDescription;
 
 public class RemoveLogEntry extends LogEntry {
+	private static final long serialVersionUID = 1L;
 
 	public RemoveLogEntry(Date timestamp, CredentialDescription credential) {
 		super(timestamp, credential);

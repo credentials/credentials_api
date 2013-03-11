@@ -26,6 +26,7 @@ import org.irmacard.credentials.info.CredentialDescription;
 import org.irmacard.credentials.info.VerificationDescription;
 
 public class VerifyLogEntry extends LogEntry {
+	private static final long serialVersionUID = 1L;
 	private VerificationDescription verification;
 	private HashMap<String, Boolean> attributeDisclosed;
 

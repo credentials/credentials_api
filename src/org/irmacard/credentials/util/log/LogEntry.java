@@ -20,11 +20,13 @@
 
 package org.irmacard.credentials.util.log;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.irmacard.credentials.info.CredentialDescription;
 
-public class LogEntry {
+public class LogEntry implements Serializable{
+	private static final long serialVersionUID = 1L;
 	private Date timestamp;
 	private CredentialDescription credential;
 

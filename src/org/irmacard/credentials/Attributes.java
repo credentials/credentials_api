@@ -21,6 +21,9 @@
 package org.irmacard.credentials;
 
 import java.io.Serializable;
+import java.math.BigInteger;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -31,12 +34,20 @@ import java.util.Set;
  */
 public class Attributes implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
+	/**
+	 * Precision factor for the expiry attribute, 1 means millisecond precision.
+	 */
+	public final static long EXPIRY_FACTOR = 1000 * 60 * 60 * 24;
+
 	// TODO: provide an implementation for attribute storage.
 	private Map<String, byte[]> attributes;
 	
 	public Attributes() {
 		attributes = new HashMap<String, byte[]>();
+
+		// Set expiry attribute to default value
+		setExpiryAttribute(null);
 	}
 	
 	public void add(String id, byte[] value) {
@@ -64,5 +75,45 @@ public class Attributes implements Serializable {
 		}
 		res += "]";
 		return res;
+	}
+
+	/**
+	 * Set the expiry attribute. This attribute is mandatory,
+	 * if no Date is specified (i.e. expiry == null) then the default expiry time
+	 * of six monts is used. Note that the granularity of the expiry time is set
+	 * by EXPIRY_FACTOR.
+	 * @param values the standard set of attributes
+	 * @param expiry optional expiry date, if null, default is used.
+	 */
+	public void setExpiryAttribute(Date expiry) {
+		Calendar expires = Calendar.getInstance();
+		if (expiry != null) {
+			expires.setTime(expiry);
+		} else {
+			expires.add(Calendar.MONTH, 6);
+		}
+        add("expiry", BigInteger.valueOf(
+        		expires.getTimeInMillis() / EXPIRY_FACTOR).toByteArray());
+	}
+
+	/**
+	 * Test whether the the credential containing these attributes is still valid
+	 * on the given date.
+	 * @return validity
+	 */
+	public boolean isValidOn(Date date) {
+		Calendar expires = Calendar.getInstance();
+		expires.setTimeInMillis((new BigInteger(get("expiry"))).longValue()
+				* EXPIRY_FACTOR);
+
+		return date.before(expires.getTime());
+	}
+
+	/**
+	 * Test whether the credential containing these attributes is currently still valid.
+	 * @return validity
+	 */
+	public boolean isValid() {
+		return isValidOn(Calendar.getInstance().getTime());
 	}
 }

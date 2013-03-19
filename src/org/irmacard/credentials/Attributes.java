@@ -78,6 +78,19 @@ public class Attributes implements Serializable {
 	}
 
 	/**
+	 * Get the expiry date of the credential containing these attributes
+	 * @param values the standard set of attributes
+	 * @param expiry optional expiry date, if null, default is used.
+	 */
+	public Date getExpiryDate() {
+		Calendar expires = Calendar.getInstance();
+		expires.setTimeInMillis((new BigInteger(get("expiry"))).longValue()
+				* EXPIRY_FACTOR);
+
+		return expires.getTime();
+	}
+
+	/**
 	 * Set the expiry attribute. This attribute is mandatory,
 	 * if no Date is specified (i.e. expiry == null) then the default expiry time
 	 * of six monts is used. Note that the granularity of the expiry time is set
@@ -102,11 +115,7 @@ public class Attributes implements Serializable {
 	 * @return validity
 	 */
 	public boolean isValidOn(Date date) {
-		Calendar expires = Calendar.getInstance();
-		expires.setTimeInMillis((new BigInteger(get("expiry"))).longValue()
-				* EXPIRY_FACTOR);
-
-		return date.before(expires.getTime());
+		return date.before(getExpiryDate());
 	}
 
 	/**

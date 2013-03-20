@@ -41,7 +41,6 @@ import net.sourceforge.scuba.smartcards.CardService;
 import net.sourceforge.scuba.smartcards.CardServiceException;
 import net.sourceforge.scuba.smartcards.CommandAPDU;
 import net.sourceforge.scuba.smartcards.ResponseAPDU;
-import net.sourceforge.scuba.smartcards.TerminalCardService;
 import net.sourceforge.scuba.util.Hex;
 
 public class CardHolderVerificationService extends CardService {
@@ -85,7 +84,7 @@ public class CardHolderVerificationService extends CardService {
     byte wPINMaxExtraDigitMin = 0x00;         // min pin length zero digits
     byte wPINMaxExtraDigitMax = 0x04;         // max pin length 12 digits
     
-	private TerminalCardService service;
+	private CardService service;
 	private List<IPinVerificationListener> pinCallbacks = new Vector<IPinVerificationListener>();
 	
 	/* Invariant: when no false PIN was entered in the last attempt
@@ -93,7 +92,7 @@ public class CardHolderVerificationService extends CardService {
 	 */
 	private Integer nrTriesLeft = null;
 
-	public CardHolderVerificationService(TerminalCardService service) {
+	public CardHolderVerificationService(CardService service) {
 		this.service = service;
 	}
 
@@ -126,6 +125,11 @@ public class CardHolderVerificationService extends CardService {
 		return service.transmit(capdu);
 	}
 
+	public byte[] transmitControlCommand(int controlCode, byte[] command) 
+	throws CardServiceException {
+		return service.transmitControlCommand(controlCode, command);
+	}
+	
 	public void close() {
 		service.close();
 	}
@@ -135,6 +139,10 @@ public class CardHolderVerificationService extends CardService {
 		return service.getATR();
 	}
 
+	public String getName() {
+		return "CardHolderVerification: " + service.getName();
+	}
+	
     public int verifyPIN() 
     throws CardServiceException {
         queryFeatures();
@@ -273,7 +281,8 @@ public class CardHolderVerificationService extends CardService {
 
         boolean pcsclite = os.toLowerCase().indexOf("windows") < 0;
 
-        String name = service.getTerminal().getName().toLowerCase();
+        String name = service.getName().toLowerCase(); 
+        // FIXME: Strip wrapped services, start reading after "Terminal: "
 
         if (name.startsWith("gemplus gempc pinpad")
                 || name.startsWith("gemalto gempc pinpad")) {

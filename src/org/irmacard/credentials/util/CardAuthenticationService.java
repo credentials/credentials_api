@@ -57,8 +57,17 @@ public class CardAuthenticationService extends CardService {
 		return service.transmit(capdu);
 	}
 
+	public byte[] transmitControlCommand(int controlCode, byte[] command)
+	throws CardServiceException {
+		return service.transmitControlCommand(controlCode, command);
+	}
+
 	public void close() {
 		service.close();
+	}
+
+	public String getName() {
+		return "Authentication: " + service.getName();
 	}
 
 	public byte[] getATR() 

@@ -20,7 +20,10 @@
 package org.irmacard.credentials.info;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * TODO: Change print statements to proper Logging statements
@@ -124,5 +127,29 @@ public class DescriptionStore {
 
 	public void addVerificationDescription(VerificationDescription vd) {
 		verificationDescriptions.put(new Integer(vd.getID()), vd);
+	}
+	
+	public Collection<IssuerDescription> getIssuerDescriptions() {
+		return issuerDescriptions.values();
+	}
+	
+	public Collection<VerificationDescription> getVerificationDescriptionsForVerifier(String verifierID) {
+		ArrayList<VerificationDescription> result = new ArrayList<VerificationDescription>();
+		for (VerificationDescription vd : verificationDescriptions.values()) {
+			if (vd.getVerifierID().equals(verifierID)) {
+				result.add(vd);
+			}
+		}
+		return result;
+	}
+	
+	public Collection<VerificationDescription> getVerificationDescriptionsForVerifier(IssuerDescription verifier) {
+		ArrayList<VerificationDescription> result = new ArrayList<VerificationDescription>();
+		for (VerificationDescription vd : verificationDescriptions.values()) {
+			if (vd.getVerifierID().equals(verifier.getID())) {
+				result.add(vd);
+			}
+		}
+		return result;
 	}
 }

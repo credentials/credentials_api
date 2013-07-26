@@ -45,20 +45,6 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 	private IssuerDescription issuerDescription;
 	
 	/**
-	 * FIXME: Constructor only for testing purposes
-	 */
-	@Deprecated
-	public CredentialDescription(short id) throws InfoException{
-		description = "A Description";
-		name = "CoolName";
-		issuerID = "CoolIssuer";
-		this.id = id;
-		
-		attributes = new ArrayList<AttributeDescription>();
-		attributes.add(new AttributeDescription());
-	}
-
-	/**
 	 * Create new credential description from file
 	 * @param file Input XML file.
 	 * @throws InfoException

@@ -64,10 +64,12 @@ import net.sourceforge.scuba.util.Hex;
  */
 public class SecureMessagingWrapper implements APDUWrapper, Serializable {
 
+	private static final String ALGORITHM = "3DES";
+
 	private static final long serialVersionUID = -2859033943345961793L;
 
-	private static final IvParameterSpec ZERO_IV_PARAM_SPEC = 
-			new IvParameterSpec(new byte[8]);
+	private static final IvParameterSpec ZERO_IV_PARAM_SPEC = new IvParameterSpec(
+			ALGORITHM.equalsIgnoreCase("AES") ? new byte[16] : new byte[8]);
 
 	private SecretKey ksEnc, ksMac;
 	private transient Cipher cipher;
@@ -115,8 +117,14 @@ public class SecureMessagingWrapper implements APDUWrapper, Serializable {
 		this.ksEnc = ksEnc;
 		this.ksMac = ksMac;
 		this.ssc = ssc;
-		cipher = Cipher.getInstance("DESede/CBC/NoPadding");
-		mac = Mac.getInstance("DESEDEMAC64");
+
+		if (ALGORITHM.equalsIgnoreCase("AES")) {
+			cipher = Cipher.getInstance("AES/CBC/NoPadding");
+			mac = Mac.getInstance("AESCMAC");
+		} else {
+			cipher = Cipher.getInstance("DESede/CBC/NoPadding");
+			mac = Mac.getInstance("DESEDEMAC64");
+		}
 	}
 
 	/**

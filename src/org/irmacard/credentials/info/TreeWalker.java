@@ -36,6 +36,7 @@ public class TreeWalker implements TreeWalkerI {
 	
 	public InputStream retrieveFile(URI path) throws InfoException {
 		try {
+			System.out.println("Retrieving file: " + path);
 			return CORE_LOCATION.resolve(path).toURL().openStream();
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
@@ -50,7 +51,7 @@ public class TreeWalker implements TreeWalkerI {
 			throws InfoException {
 		this.descriptionStore = descriptionStore;
 		File[] files = new File(CORE_LOCATION).listFiles();
-	for(File f : files) {
+		for(File f : files) {
 			if(f.isDirectory()) {
 				tryProcessIssuer(f);
 			}

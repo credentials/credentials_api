@@ -109,22 +109,27 @@ public class DescriptionStore {
 			}
 		}
 
+		System.out.println("Cannot find verifier with this id");
 		return null;
 	}
 
 	public void addCredentialDescription(CredentialDescription cd) {
+		// TODO Add check here to see if ID was already used
 		credentialDescriptions.put(new Integer(cd.getId()), cd);
 	}
 	
 	public IssuerDescription getIssuerDescription(String name) {
+		// TODO Add check here to see if ID was already used 
 		return issuerDescriptions.get(name);
 	}
 	
 	public void addIssuerDescription(IssuerDescription id) {
+		// TODO Add check here to see if ID was already used
 		issuerDescriptions.put(id.getID(), id);
 	}
 
 	public void addVerificationDescription(VerificationDescription vd) {
+		// TODO Add check here to see if ID was already used
 		verificationDescriptions.put(new Integer(vd.getID()), vd);
 	}
 	

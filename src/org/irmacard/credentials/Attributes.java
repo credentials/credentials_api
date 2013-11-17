@@ -22,6 +22,7 @@ package org.irmacard.credentials;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,8 +30,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A generic container class for attributes. Possibly this will just manage 
- * attribute id and value pairs.
+ * A generic container class for attributes. Possibly this will just manage
+ * attribute id and value pairs. The metadata field however, is handled
+ * differently. Pre 0.8 version cards hold only the expiry date in this
+ * slot, since 0.8 this has been changed to hold multiple fields.
  */
 public class Attributes implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -40,14 +43,30 @@ public class Attributes implements Serializable {
 	 */
 	public final static long EXPIRY_FACTOR = 1000 * 60 * 60 * 24;
 
+	public final static String META_DATA_FIELD = "metadata";
+	public final static byte VERSION = (byte) 0x01;
+	public final static int VERSION_OFFSET = 0;
+	public final static int VERSION_LENGTH = 1;
+	public final static int EXPIRY_OFFSET = 1;
+	public final static int EXPIRY_LENGTH = 3;
+	public final static int CRED_ID_OFFSET = 4;
+	public final static int CRED_ID_LENGTH = 2;
+	public final static int META_DATA_LENGTH = VERSION_LENGTH + EXPIRY_LENGTH + CRED_ID_LENGTH;
+	public final static int PREVIOUS_META_LENGTH = 2;
+
 	// TODO: provide an implementation for attribute storage.
 	private Map<String, byte[]> attributes;
 	
 	public Attributes() {
 		attributes = new HashMap<String, byte[]>();
 
-		// Set expiry attribute to default value
-		setExpiryAttribute(null);
+		// Create meta-data field
+		byte[] metadata = new byte[META_DATA_LENGTH];
+		metadata[VERSION_OFFSET] = VERSION;
+		add(META_DATA_FIELD, metadata);
+
+		// Set expire date meta-field to default value
+		setExpireDate(null);
 	}
 	
 	public void add(String id, byte[] value) {
@@ -83,30 +102,78 @@ public class Attributes implements Serializable {
 	 * @param expiry optional expiry date, if null, default is used.
 	 */
 	public Date getExpiryDate() {
-		Calendar expires = Calendar.getInstance();
-		expires.setTimeInMillis((new BigInteger(get("expiry"))).longValue()
-				* EXPIRY_FACTOR);
+		byte[] metadata = get(META_DATA_FIELD);
+		long expiry = 0;
 
+		if (metadata.length == PREVIOUS_META_LENGTH) {
+			expiry = new BigInteger(metadata).longValue();
+		} else {
+			byte[] expiry_field = Arrays.copyOfRange(metadata,
+					EXPIRY_OFFSET, EXPIRY_OFFSET + EXPIRY_LENGTH);
+			expiry = new BigInteger(expiry_field).longValue();
+		}
+
+		Calendar expires = Calendar.getInstance();
+		expires.setTimeInMillis(expiry * EXPIRY_FACTOR);
 		return expires.getTime();
 	}
 
 	/**
-	 * Set the expiry attribute. This attribute is mandatory,
+	 * Set the expiry meta-field. This field is mandatory,
 	 * if no Date is specified (i.e. expiry == null) then the default expiry time
 	 * of six monts is used. Note that the granularity of the expiry time is set
 	 * by EXPIRY_FACTOR.
-	 * @param values the standard set of attributes
 	 * @param expiry optional expiry date, if null, default is used.
 	 */
-	public void setExpiryAttribute(Date expiry) {
+	public void setExpireDate(Date expiry) {
 		Calendar expires = Calendar.getInstance();
 		if (expiry != null) {
 			expires.setTime(expiry);
 		} else {
 			expires.add(Calendar.MONTH, 6);
 		}
-        add("expiry", BigInteger.valueOf(
-        		expires.getTimeInMillis() / EXPIRY_FACTOR).toByteArray());
+
+		byte[] expiry_field = BigInteger.valueOf(
+				expires.getTimeInMillis() / EXPIRY_FACTOR).toByteArray();
+		byte[] metadata = attributes.get(META_DATA_FIELD);
+
+		// Zero the fields first
+		for (int i = 0; i < EXPIRY_LENGTH; i++) {
+			metadata[EXPIRY_OFFSET + i] = (byte) 0x0;
+		}
+
+		// Offset the data, so recovery works
+		for (int i = 0; i < expiry_field.length; i++) {
+			int idx = EXPIRY_OFFSET + (EXPIRY_LENGTH - expiry_field.length) + i;
+			metadata[idx] = expiry_field[i];
+		}
+
+		add("metadata", metadata);
+	}
+
+	/**
+	 * Sets the credential id meta-field. This field is mandatory.
+	 * @param id
+	 */
+	public void setCredentialID(short id) {
+		byte[] metadata = attributes.get(META_DATA_FIELD);
+		metadata[CRED_ID_OFFSET] = (byte) (id >> 8);
+		metadata[CRED_ID_OFFSET + 1] = (byte) (id & 0xff);
+		add("metadata", metadata);
+	}
+
+	/**
+	 * Gets the credential id meta-field.
+	 */
+	public short getCredentialID() {
+		byte[] metadata = attributes.get(META_DATA_FIELD);
+		if (metadata.length > PREVIOUS_META_LENGTH) {
+			return (short) (((metadata[CRED_ID_OFFSET] & 0xff) << 8) |
+					(metadata[CRED_ID_OFFSET + 1] & 0xff));
+		} else {
+			// Not available in old credentials
+			return 0;
+		}
 	}
 
 	/**

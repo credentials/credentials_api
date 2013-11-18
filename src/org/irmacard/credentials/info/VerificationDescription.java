@@ -215,4 +215,11 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 		}
 		return issuerDescription;
 	}
+
+	/**
+	 * Is attribute disclosed?
+	 */
+	public boolean isDisclosed(String attr_name) {
+		return attributeDisclosed.get(attr_name);
+	}
 }

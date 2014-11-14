@@ -1,4 +1,4 @@
-* Credentials API
+# Credentials API
 
 The Credentials API is the high-level interface to the credential system. The
 API abstracts away from the low-level details involved in the communication
@@ -18,3 +18,36 @@ with the following two basic methods:
    to verify the proof and it will either report failure, or it will return the
    revealed attributes to the relying party.
 
+## Dependencies
+
+This library has the following dependencies.  All these dependencies will be automatically downloaded by gradle when building or installing the library (except for cert-cvc, which is included).
+
+External dependencies:
+
+ * [Cert-CVC](http://www.ejbca.org/) (included)
+
+Internal dependencies:
+
+ * credentials/scuba, scuba_smartcards The Scuba smart-card abstraction layer
+
+The build system depends on gradle version at least 1.12.
+
+## Building using Gradle (recommended)
+
+When you are using the Gradle build system, just run
+
+    gradle install
+
+to install the library to your local repository. This assumes you have downloaded the archive. Alternatively, you can run
+
+    gradle build
+
+to just build the library.
+
+## Eclipse development files
+
+You can run
+
+    gradle eclipse
+
+to create the required files for importing the project into Eclipse.

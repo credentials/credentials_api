@@ -1,0 +1,30 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+
+targetCompatibility = 1.6
+sourceCompatibility = 1.6
+
+version = '0.8'
+group = 'org.irmacard.credentials'
+
+// Our directory structure differs from the default
+sourceSets.main.java {
+    srcDir 'src'
+}
+
+repositories {
+    mavenLocal()
+    maven {
+        url "https://credentials.github.io/repos/maven2/"
+    }
+}
+
+dependencies {
+    compile "net.sourceforge.scuba:scuba_smartcards:0.0.3"
+    compile files('lib/cert-cvc-1.3.0.jar')
+}
+
+uploadArchives.repositories.mavenDeployer {
+    repository(url: mavenRepositoryIRMA )
+}

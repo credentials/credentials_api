@@ -22,6 +22,8 @@ dependencies {
     compile files('lib/cert-cvc-1.3.0.jar')
 }
 
-uploadArchives.repositories.mavenDeployer {
-    repository(url: mavenRepositoryIRMA )
+if ( project.hasProperty("mavenRepositoryIRMA") ) {
+    uploadArchives.repositories.mavenDeployer {
+        repository(url: mavenRepositoryIRMA)
+    }
 }

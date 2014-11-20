@@ -28,7 +28,7 @@ External dependencies:
 
 Internal dependencies:
 
- * credentials/scuba, scuba_smartcards The Scuba smart-card abstraction layer
+ * [Scuba](https://github.com/credentials/scuba), The smartcard abstraction layer, uses ` and `scuba_smartcard`
 
 The build system depends on gradle version at least 1.12.
 

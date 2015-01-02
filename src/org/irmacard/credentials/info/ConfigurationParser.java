@@ -12,7 +12,9 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 abstract public class ConfigurationParser {
-	DocumentBuilder db;
+	// TODO: need to mark this transient to exclude it from GSON serialization
+	// which is annoying.
+	protected transient DocumentBuilder db;
 
 	ConfigurationParser() throws InfoException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();

@@ -16,7 +16,7 @@ abstract public class ConfigurationParser {
 	// which is annoying.
 	protected transient DocumentBuilder db;
 
-	ConfigurationParser() throws InfoException {
+	public ConfigurationParser() {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		// dbf.setValidating(true);
 		dbf.setIgnoringComments(true);
@@ -26,7 +26,7 @@ abstract public class ConfigurationParser {
 		try {
 			db = dbf.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
-			throw new InfoException(e, "Cannot construct XML parser.");
+			throw new RuntimeException(e);
 		}
 	}
 

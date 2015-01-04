@@ -141,6 +141,7 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 	
 	/**
 	 * Get the internal identifier used to denote this credential
+	 * TODO: make naming consistent with other getID's
 	 */
 	public short getId() {
 		return id; 

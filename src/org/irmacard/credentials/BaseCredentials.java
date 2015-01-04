@@ -19,7 +19,6 @@
 
 package org.irmacard.credentials;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
@@ -28,12 +27,9 @@ import net.sourceforge.scuba.smartcards.CardServiceException;
 
 import org.irmacard.credentials.info.CredentialDescription;
 import org.irmacard.credentials.info.InfoException;
-import org.irmacard.credentials.keys.PrivateKey;
-import org.irmacard.credentials.spec.IssueSpecification;
-import org.irmacard.credentials.spec.VerifySpecification;
 import org.irmacard.credentials.util.log.LogEntry;
 
-public abstract class BaseCredentials implements Credentials {
+public abstract class BaseCredentials {
 	protected CardService cs = null;
 
 	public BaseCredentials() {
@@ -85,31 +81,4 @@ public abstract class BaseCredentials implements Credentials {
 		
 		return log;
 	}
-	
-	@Override
-	public void issue(IssueSpecification specification, PrivateKey isk, Attributes values, Date expires)
-			throws CredentialsException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public IssueSpecification issueSpecification() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Attributes verify(VerifySpecification specification)
-			throws CredentialsException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public VerifySpecification verifySpecification() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

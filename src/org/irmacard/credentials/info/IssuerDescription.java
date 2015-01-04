@@ -22,6 +22,7 @@ package org.irmacard.credentials.info;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
+
 import org.w3c.dom.Document;
 
 public class IssuerDescription extends ConfigurationParser implements Serializable {
@@ -63,6 +64,7 @@ public class IssuerDescription extends ConfigurationParser implements Serializab
 	}
 
 	/**
+	 * TODO: Remove when ready
 	 * In the Idemix-library system parameters are identified using a base URL together
 	 * with a filename to specify the specific parameter types. This function returns this
 	 * base URL.

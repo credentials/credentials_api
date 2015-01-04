@@ -20,12 +20,15 @@
 
 package org.irmacard.credentials;
 
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
 import net.sourceforge.scuba.smartcards.ProtocolCommand;
 import net.sourceforge.scuba.smartcards.ProtocolResponses;
 
+import org.irmacard.credentials.info.CredentialDescription;
+import org.irmacard.credentials.info.VerificationDescription;
 import org.irmacard.credentials.keys.PrivateKey;
 import org.irmacard.credentials.spec.IssueSpecification;
 import org.irmacard.credentials.spec.VerifySpecification;
@@ -49,7 +52,7 @@ public interface Credentials {
 	 * @throws CredentialsException
 	 *             if the issuance process fails.
 	 */
-	public void issue(IssueSpecification specification, PrivateKey pkey, Attributes values, Date expires)
+	public void issue(CredentialDescription specification, PrivateKey pkey, Attributes values, Date expires)
 			throws CredentialsException;
 
 	/**
@@ -85,13 +88,15 @@ public interface Credentials {
 	 * @throws CredentialsException
 	 */
 	public List<ProtocolCommand> requestProofCommands(
-			VerifySpecification specification, Nonce nonce) throws CredentialsException;
+			VerificationDescription specification, BigInteger nonce) throws CredentialsException;
 
 	/**
 	 * Compile the cards responses into a proof and check this proof for correctness.
 	 * This is a lower-level entry-point to the API, that allows the user to
 	 * process the resulting APDU commands using a separate, possibly
 	 * asynchronous interface.
+	 * 
+	 * TODO: Wrap nonce again in Nonce object?
 	 *
 	 * @param specification
 	 *            specification of the credential and attributes to be verified.
@@ -101,8 +106,8 @@ public interface Credentials {
 	 *         if verification failed
 	 * @throws CredentialsException
 	 */
-	public Attributes verifyProofResponses(VerifySpecification specification,
-			Nonce nonce, ProtocolResponses responses) throws CredentialsException;
+	public Attributes verifyProofResponses(VerificationDescription specification,
+			BigInteger nonce, ProtocolResponses responses) throws CredentialsException;
 
 	/**
 	 * Generate a nonce for use in the asynchronous API. This nonce contains all the
@@ -113,13 +118,4 @@ public interface Credentials {
 	 */
 	public Nonce generateNonce(VerifySpecification specification)
 			throws CredentialsException;
-
-	/**
-	 * Get a blank VerifySpecification matching this Credentials provider.
-	 * TODO: WL: Would suggest to remove this.
-	 * 
-	 * @return a blank specification matching this provider.
-	 */
-	public VerifySpecification verifySpecification();
-
 }

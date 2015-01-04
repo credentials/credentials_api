@@ -57,17 +57,6 @@ public abstract class BaseCredentials {
 		
 		return list;
 	}
-
-	/**
-	 * Get the attribute values stored on the card for the given credential.
-	 *  
-	 * @param credential description used as identifier.
-	 * @return attributes for the given credential.
-	 * @throws CardServiceException 
-	 */
-	public Attributes getAttributes(CredentialDescription cd) throws CardServiceException {
-		return null;
-	}
 	
 	/**
 	 * Get the transaction log from the card.

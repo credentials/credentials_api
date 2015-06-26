@@ -24,8 +24,8 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
-import net.sourceforge.scuba.smartcards.ProtocolCommand;
-import net.sourceforge.scuba.smartcards.ProtocolResponses;
+import net.sf.scuba.smartcards.ProtocolCommand;
+import net.sf.scuba.smartcards.ProtocolResponses;
 
 import org.irmacard.credentials.info.CredentialDescription;
 import org.irmacard.credentials.info.VerificationDescription;

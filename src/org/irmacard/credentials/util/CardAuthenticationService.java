@@ -27,10 +27,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESedeKeySpec;
 
-import net.sourceforge.scuba.smartcards.CardService;
-import net.sourceforge.scuba.smartcards.CardServiceException;
-import net.sourceforge.scuba.smartcards.CommandAPDU;
-import net.sourceforge.scuba.smartcards.ResponseAPDU;
+import net.sf.scuba.smartcards.CardService;
+import net.sf.scuba.smartcards.CardServiceException;
+import net.sf.scuba.smartcards.CommandAPDU;
+import net.sf.scuba.smartcards.ResponseAPDU;
 
 public class CardAuthenticationService extends CardService {
 

@@ -22,8 +22,8 @@ package org.irmacard.credentials;
 import java.util.List;
 import java.util.Vector;
 
-import net.sourceforge.scuba.smartcards.CardService;
-import net.sourceforge.scuba.smartcards.CardServiceException;
+import net.sf.scuba.smartcards.CardService;
+import net.sf.scuba.smartcards.CardServiceException;
 
 import org.irmacard.credentials.info.CredentialDescription;
 import org.irmacard.credentials.info.InfoException;

@@ -7,3 +7,5 @@ credentials_api.*jar
 .settings/
 .gradle/
 build/
+.idea/
+*.iml

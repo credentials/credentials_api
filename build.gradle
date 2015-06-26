@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    compile "net.sourceforge.scuba:scuba_smartcards:0.0.3"
+    compile "net.sf.scuba:scuba_smartcards:0.0.7-irma"
     compile files('lib/cert-cvc-1.3.0.jar')
 }
 

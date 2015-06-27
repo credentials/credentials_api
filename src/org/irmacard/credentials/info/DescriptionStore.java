@@ -97,6 +97,7 @@ public class DescriptionStore {
 			}
 		}
 
+		// TODO: error handling? Exception?
 		return null;
 	}
 
@@ -109,27 +110,48 @@ public class DescriptionStore {
 			}
 		}
 
+		// TODO: error handling? Exception?
 		System.out.println("Cannot find verifier with this id");
 		return null;
 	}
 
-	public void addCredentialDescription(CredentialDescription cd) {
-		// TODO Add check here to see if ID was already used
-		credentialDescriptions.put(new Integer(cd.getId()), cd);
+	public void addCredentialDescription(CredentialDescription cd)
+			throws InfoException {
+		Integer id = new Integer(cd.getId());
+		if (credentialDescriptions.containsKey(id)) {
+			CredentialDescription other = credentialDescriptions.get(id);
+			throw new InfoException("Cannot add credential " + cd.getName()
+					+ ". Credential " + other.getCredentialID() + " of issuer "
+					+ other.getIssuerID() + " has the same id (" + id + ").");
+		}
+		credentialDescriptions.put(id, cd);
 	}
 	
 	public IssuerDescription getIssuerDescription(String name) {
-		// TODO Add check here to see if ID was already used 
 		return issuerDescriptions.get(name);
 	}
-	
-	public void addIssuerDescription(IssuerDescription id) {
-		// TODO Add check here to see if ID was already used
+
+	public void addIssuerDescription(IssuerDescription id) throws InfoException {
+		if (issuerDescriptions.containsKey(id.getID())) {
+			throw new InfoException("Cannot add issuer " + id.getName()
+					+ ". An issuer with the id " + id.getID()
+					+ " already exists.");
+		}
 		issuerDescriptions.put(id.getID(), id);
 	}
 
-	public void addVerificationDescription(VerificationDescription vd) {
-		// TODO Add check here to see if ID was already used
+	public void addVerificationDescription(VerificationDescription vd)
+			throws InfoException {
+		Integer id = new Integer(vd.getID());
+		if (verificationDescriptions.containsKey(id)) {
+			VerificationDescription other = verificationDescriptions.get(id);
+			throw new InfoException("Cannot add verification "
+					+ vd.getVerificationID() + " of "
+					+ vd.getVerifierID() + ". Verification "
+					+ other.getVerificationID() + " of "
+					+ other.getVerifierID() + " shares the same id ("
+					+ id + ").");
+		}
 		verificationDescriptions.put(new Integer(vd.getID()), vd);
 	}
 	

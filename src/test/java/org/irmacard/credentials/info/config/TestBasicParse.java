@@ -1,4 +1,4 @@
-package org.ru.irma.api.tests.config;
+package org.irmacard.credentials.info.config;
 
 import static org.junit.Assert.fail;
 

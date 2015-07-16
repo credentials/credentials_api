@@ -9,6 +9,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 abstract public class ConfigurationParser {
@@ -35,17 +36,15 @@ abstract public class ConfigurationParser {
 		try {
 			inputStream = file.toURL().openStream();
 		} catch (IOException e) {
-			throw new InfoException(e, "Cannot read input file " + file.toString() + ".");
+			throw new InfoException("Cannot read input file " + file.toString() + ".", e);
 		}
-		
+
 		try {
 			return internalParse(inputStream);
 		} catch (SAXException e) {
-			throw new InfoException(e, "Parsing configuration file "
-					+ file.toString() + " failed.");
+			throw new InfoException("Parsing configuration file " + file.toString() + " failed.", e);
 		} catch (IOException e) {
-			throw new InfoException(e, "Cannot read configuration file "
-					+ file.toString() + ".");
+			throw new InfoException("Cannot read configuration file " + file.toString() + ".", e);
 		}
 	}
 
@@ -53,17 +52,21 @@ abstract public class ConfigurationParser {
 		try {
 			return internalParse(inputStream);
 		} catch (SAXException e) {
-			throw new InfoException(e, "Parsing configuration file failed.");
+			throw new InfoException("Parsing configuration file failed.", e);
 		} catch (IOException e) {
-			throw new InfoException(e, "Cannot read configuration file.");
+			throw new InfoException("Cannot read configuration file.", e);
 		}
 	}
-	
+
 	private Document internalParse(InputStream inputStream) throws SAXException, IOException {
 		return db.parse(inputStream);
 	}
-	
-	protected String getFirstTagText(Document d, String tag) {
-		return d.getElementsByTagName(tag).item(0).getTextContent().trim();
+
+	protected String getFirstTagText(Document d, String tag) throws InfoException {
+		NodeList all = d.getElementsByTagName(tag);
+		if (all.getLength() == 0) {
+			throw new InfoException("Expected tag <" + tag + "> is missing.");
+		}
+		return all.item(0).getTextContent().trim();
 	}
 }

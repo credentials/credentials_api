@@ -124,7 +124,7 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 		init(d);
 	}
 
-	private void init(Document d) {
+	private void init(Document d) throws InfoException {
 		name = getFirstTagText(d, "Name");
 		id = (short) Integer.parseInt(getFirstTagText(d, "Id"));
 
@@ -147,9 +147,13 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 
 			// Both attributes are mandatory
 			// FIXME: handle this with a verification on the XML level
-			if( id.equals("") || mode.equals("")) {
-				System.err.println("ERROR: cannot find id or mode for attribute");
-				continue;
+			if (id.equals("")) {
+				throw new InfoException(
+						"AttributeMode for " + verifierID + "/" + verificationID + " is missing the id attribute");
+			}
+			if (mode.equals("")) {
+				throw new InfoException(
+						"AttributeMode for " + verifierID + "/" + verificationID + " is missing the mode attribute");
 			}
 
 			// The mode attribute must be either "revealed" or "unrevealed"
@@ -157,11 +161,10 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 			if (mode.equals("revealed") || mode.equals("unrevealed")) {
 				bdisclosed = mode.equals("revealed");
 			} else {
-				System.err.println("ERROR: mode should be 'revealed' or 'unrevealed'");
-				continue;
+				throw new InfoException("AttributeMode for " + verifierID + "/" + verificationID
+						+ " mode should be 'revealed' or 'unrevealed'");
 			}
 
-			System.out.println("Attribute " + id + " disclosed: " + bdisclosed);
 			attributeDisclosed.put(id, bdisclosed);
 		}
 	}

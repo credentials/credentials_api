@@ -111,7 +111,6 @@ public class DescriptionStore {
 		}
 
 		// TODO: error handling? Exception?
-		System.out.println("Cannot find verifier with this id");
 		return null;
 	}
 

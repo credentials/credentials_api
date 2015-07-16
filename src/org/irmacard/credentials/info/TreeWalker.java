@@ -29,21 +29,21 @@ public class TreeWalker implements TreeWalkerI {
 	URI CORE_LOCATION;
 	DescriptionStore descriptionStore;
 	IssuerDescription currentIssuer;
-	
+
+	// Used for reporting exceptions
+	private URI currentFile;
+
 	public TreeWalker(URI coreLocation) {
 		CORE_LOCATION = coreLocation;
 	}
-	
+
 	public InputStream retrieveFile(URI path) throws InfoException {
 		try {
-			System.out.println("Retrieving file: " + path);
 			return CORE_LOCATION.resolve(path).toURL().openStream();
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			throw new InfoException(e, "Tried to read file " + path);
+			throw new InfoException("Tried to read file " + path, e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			throw new InfoException(e, "Tried to read file " + path);
+			throw new InfoException("Tried to read file " + path, e);
 		}
 	}
 
@@ -51,44 +51,43 @@ public class TreeWalker implements TreeWalkerI {
 			throws InfoException {
 		this.descriptionStore = descriptionStore;
 		File[] files = new File(CORE_LOCATION).listFiles();
-		for(File f : files) {
-			if(f.isDirectory()) {
-				tryProcessIssuer(f);
+		try {
+			for (File f : files) {
+				if (f.isDirectory()) {
+					tryProcessIssuer(f);
+				}
 			}
+		} catch (InfoException e) {
+			throw new InfoException("Error processing file: " + currentFile, e);
 		}
 	}
-	
+
 	private void tryProcessIssuer(File f) throws InfoException {
 		// Determine whether we should process this directory.
 		File config = new File(f.toURI().resolve("description.xml"));
 		if(config.exists()) {
-			System.out.println("Config found, now processing");
-			System.out.println(config);
-			
+			currentFile = config.toURI();
 			currentIssuer = new IssuerDescription(config.toURI());
-			System.out.println("Got Issuer: " + currentIssuer);
 			descriptionStore.addIssuerDescription(currentIssuer);
-			
+
 			// Process credentials issued by this issuer
 			tryProcessCredentials(f);
-			
+
 			// Process verification descriptions
 			tryProcessVerifications(f);
 		}
 	}
-	
+
 	private void tryProcessCredentials(File f) throws InfoException {
 		File credentials = new File(f.toURI().resolve("Issues"));
 		if(credentials.exists()) {
-			System.out.println("Credentials exists");
 			for (File c : credentials.listFiles()) {
-				System.out.println("Processing credential: " + c);
 				URI credentialspec = c.toURI().resolve("description.xml");
 				if((new File(credentialspec)).exists()) {
+					currentFile = credentialspec;
 					CredentialDescription cd = new CredentialDescription(
 							credentialspec);
 					descriptionStore.addCredentialDescription(cd);
-					System.out.println(cd);
 				} else {
 					System.out
 							.println("Expected new form credential description");
@@ -100,15 +99,13 @@ public class TreeWalker implements TreeWalkerI {
 	private void tryProcessVerifications(File f) throws InfoException {
 		File verifications = new File(f.toURI().resolve("Verifies"));
 		if(verifications.exists()) {
-			System.out.println("Proof specifications exists");
 			for (File v : verifications.listFiles()) {
-				System.out.println("Processing proofSpec: " + v);
 				URI verification = v.toURI().resolve("description.xml");
 				if((new File(verification)).exists()) {
+					currentFile = verification;
 					VerificationDescription vd = new VerificationDescription(
 							verification);
 					descriptionStore.addVerificationDescription(vd);
-					System.out.println(vd);
 				} else {
 					System.out
 							.println("Expected new form verification description");

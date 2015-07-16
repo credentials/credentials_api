@@ -65,15 +65,15 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 		Document d = parse(stream);
 		init(d);
 	}
-	
-	private void init(Document d) {
+
+	private void init(Document d) throws InfoException {
 		description = getFirstTagText(d, "Description");
 		name = getFirstTagText(d, "Name");
 		shortName = getFirstTagText(d, "ShortName");
 		issuerID = getFirstTagText(d, "IssuerID");
 		credentialID = getFirstTagText(d, "CredentialID");
 		id = (short) Integer.parseInt(getFirstTagText(d, "Id"));
-		
+
 		NodeList attrList = ((Element) d.getElementsByTagName("Attributes")
 				.item(0)).getElementsByTagName("Attribute");
 		attributes = new ArrayList<AttributeDescription>();

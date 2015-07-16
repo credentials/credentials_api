@@ -79,21 +79,21 @@ public class IssuerDescription extends ConfigurationParser implements Serializab
 		Document d = parse(file);
 		init(d);
 	}
-	
+
 	public IssuerDescription(InputStream stream) throws InfoException {
 		super();
 		Document d = parse(stream);
 		init(d);
 	}
-	
-	private void init(Document d) {
+
+	private void init(Document d) throws InfoException {
 		name = getFirstTagText(d, "Name");
 		id = getFirstTagText(d, "ID");
 		contactAddress = getFirstTagText(d, "ContactAddress");
 		contactEMail = getFirstTagText(d, "ContactEMail");
 		baseURL = getFirstTagText(d, "baseURL");
 	}
-	
+
 	public String toString() {
 		return name + ": " + baseURL + " (" + contactAddress + ", " + contactEMail + ")";
 	}

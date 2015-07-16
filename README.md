@@ -18,7 +18,11 @@ External dependencies:
 
 Internal dependencies:
 
- * [Scuba](https://github.com/credentials/scuba), The smartcard abstraction layer, uses ` and `scuba_smartcard`
+ * [Scuba](https://github.com/credentials/scuba), The smartcard abstraction layer, uses `scuba_smartcard`
+
+For running the tests:
+
+ * JUnit,  (>= 4.8), the Java unit-testing library
 
 The build system depends on gradle version at least 1.12.
 
@@ -41,3 +45,13 @@ You can run
     gradle eclipse
 
 to create the required files for importing the project into Eclipse.
+
+## Running tests
+
+The tests are always run, just make sure that you do have a valid checkout of `irma_configuration` (see below). If you want to force the tests (for example because irma_configuration changed) run
+
+    gradle cleanTest test
+
+### irma_configuration
+
+Download or link the `irma_configuration` project to a location within your tree. In particular the tests below assume that `irma_configuration` is placed in the root of this project.

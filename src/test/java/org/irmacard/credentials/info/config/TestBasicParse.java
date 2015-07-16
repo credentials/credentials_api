@@ -39,7 +39,6 @@ import org.irmacard.credentials.info.CredentialDescription;
 import org.irmacard.credentials.info.DescriptionStore;
 import org.irmacard.credentials.info.InfoException;
 import org.irmacard.credentials.info.VerificationDescription;
-import org.junit.Assert;
 import org.junit.Test;
 
 

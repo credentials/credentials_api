@@ -150,6 +150,13 @@ public class DescriptionStore {
 		issuerDescriptions.put(id.getID(), id);
 	}
 
+	public void updateIssuerDescription(IssuerDescription id) {
+		if (issuerDescriptions.containsKey(id.getID())) {
+			issuerDescriptions.remove(id.getID());
+		}
+		issuerDescriptions.put(id.getID(), id);
+	}
+
 	public void addVerificationDescription(VerificationDescription vd)
 			throws InfoException {
 		Integer id = new Integer(vd.getID());
@@ -161,6 +168,15 @@ public class DescriptionStore {
 					+ other.getVerificationID() + " of "
 					+ other.getVerifierID() + " shares the same id ("
 					+ id + ").");
+		}
+		verificationDescriptions.put(new Integer(vd.getID()), vd);
+	}
+
+	public void updateVerificationDescription(VerificationDescription vd)
+			throws InfoException {
+		Integer id = new Integer(vd.getID());
+		if (verificationDescriptions.containsKey(id)) {
+			verificationDescriptions.remove(id);
 		}
 		verificationDescriptions.put(new Integer(vd.getID()), vd);
 	}

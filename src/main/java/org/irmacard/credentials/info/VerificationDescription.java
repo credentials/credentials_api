@@ -214,6 +214,10 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 		return credentialDescription;
 	}
 
+	public void updateCredentialDescription(CredentialDescription c) {
+		credentialDescription = c;
+	}
+
 	/**
 	 * Get the issuer description. If necessary it is loaded from the DescriptionStore.
 	 * @return the issuer description.

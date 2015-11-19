@@ -108,11 +108,22 @@ public class Attributes implements Serializable {
 
 	/**
 	 * Get the expiry date of the credential containing these attributes
-	 * @param values the standard set of attributes
-	 * @param expiry optional expiry date, if null, default is used.
 	 */
 	public Date getExpiryDate() {
-		byte[] metadata = get(META_DATA_FIELD);
+		return extractExpiryDate(get(META_DATA_FIELD));
+	}
+
+	/**
+	 * Interpret the specified BigInteger as a metadata attribute and extract the validity date.
+	 */
+	public static Date extractExpiryDate(BigInteger metadata) {
+		return extractExpiryDate(metadata.toByteArray());
+	}
+
+	/**
+	 * Interpret the specified byte array as a metadata attribute and extract the validity date.
+	 */
+	public static Date extractExpiryDate(byte[] metadata) {
 		long expiry = 0;
 
 		if (metadata.length == PREVIOUS_META_LENGTH) {
@@ -176,7 +187,20 @@ public class Attributes implements Serializable {
 	 * Gets the credential id meta-field.
 	 */
 	public short getCredentialID() {
-		byte[] metadata = attributes.get(META_DATA_FIELD);
+		return extractCredentialId(attributes.get(META_DATA_FIELD));
+	}
+
+	/**
+	 * Interpret the specified BigInteger as a metadata attribute and extract the credential ID.
+	 */
+	public static short extractCredentialId(BigInteger metadata) {
+		return extractCredentialId(metadata.toByteArray());
+	}
+
+	/**
+	 * Interpret the specified byte array as a metadata attribute and extract the credential ID.
+	 */
+	public static short extractCredentialId(byte[] metadata) {
 		if (metadata.length > PREVIOUS_META_LENGTH) {
 			return (short) (((metadata[CRED_ID_OFFSET] & 0xff) << 8) |
 					(metadata[CRED_ID_OFFSET + 1] & 0xff));
@@ -196,10 +220,48 @@ public class Attributes implements Serializable {
 	}
 
 	/**
+	 * Test whether a credential containing the specified metadata attribute would be valid on the given date.
+	 * @param date Date to test
+	 * @param metadata Metadata attribute
+	 * @return validity
+	 */
+	public static boolean isValidOn(Date date, BigInteger metadata) {
+		return date.before(extractExpiryDate(metadata));
+	}
+
+	/**
+	 * Test whether a credential containing the specified metadata attribute would be valid on the given date.
+	 * @param date Date to test
+	 * @param metadata Metadata attribute
+	 * @return validity
+	 */
+	public static boolean isValidOn(Date date, byte[] metadata) {
+		return date.before(extractExpiryDate(metadata));
+	}
+
+	/**
 	 * Test whether the credential containing these attributes is currently still valid.
 	 * @return validity
 	 */
 	public boolean isValid() {
 		return isValidOn(Calendar.getInstance().getTime());
+	}
+
+	/**
+	 * Test whether a credential containing the specified metadata attribute would currently be valid.
+	 * @param metadata Metadata attribute
+	 * @return validity
+	 */
+	public static boolean isValid(BigInteger metadata) {
+		return isValidOn(Calendar.getInstance().getTime(), metadata);
+	}
+
+	/**
+	 * Test whether a credential containing the specified metadata attribute would currently be valid.
+	 * @param metadata Metadata attribute
+	 * @return validity
+	 */
+	public static boolean isValid(byte[] metadata) {
+		return isValidOn(Calendar.getInstance().getTime(), metadata);
 	}
 }

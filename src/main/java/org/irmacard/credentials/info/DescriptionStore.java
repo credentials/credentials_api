@@ -90,6 +90,10 @@ public class DescriptionStore {
 			treeWalker.parseConfiguration(this);
 		}
 	}
+
+	public static boolean isLocationSet() {
+		return CORE_LOCATION != null;
+	}
 	
 	public CredentialDescription getCredentialDescription(short id) {
 		return credentialDescriptions.get(new Integer(id));

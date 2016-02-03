@@ -142,6 +142,13 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 	}
 
 	/**
+	 * Get the full identifier for this credential.
+	 */
+	public String getIdentifier() {
+		return issuerID + "." + credentialID;
+	}
+
+	/**
 	 * Get a more eleborate description of the credential.
 	 * 
 	 * @return credential description

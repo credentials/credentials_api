@@ -44,7 +44,7 @@ public class DescriptionStore {
 	
 	static DescriptionStore ds;
 	
-	HashMap<Integer,CredentialDescription> credentialDescriptions = new HashMap<Integer, CredentialDescription>();
+	HashMap<String,CredentialDescription> credentialDescriptions = new HashMap<String, CredentialDescription>();
 	HashMap<String,IssuerDescription> issuerDescriptions = new HashMap<String, IssuerDescription>();
 	HashMap<Integer,VerificationDescription> verificationDescriptions = new HashMap<Integer, VerificationDescription>();
 
@@ -96,20 +96,21 @@ public class DescriptionStore {
 	}
 	
 	public CredentialDescription getCredentialDescription(short id) {
-		return credentialDescriptions.get(new Integer(id));
-	}
-
-	public CredentialDescription getCredentialDescriptionByName(String issuer,
-			String credID) {
 		for (CredentialDescription cd : credentialDescriptions.values()) {
-			if (cd.getIssuerID().equals(issuer)
-					&& cd.getCredentialID().equals(credID)) {
+			if (cd.getId() == id) {
 				return cd;
 			}
 		}
 
-		// TODO: error handling? Exception?
 		return null;
+	}
+
+	public CredentialDescription getCredentialDescription(String identifier) {
+		return credentialDescriptions.get(identifier);
+	}
+
+	public CredentialDescription getCredentialDescriptionByName(String issuer, String credID) {
+		return getCredentialDescription(issuer + "." + credID);
 	}
 
 	public VerificationDescription getVerificationDescriptionByName(
@@ -125,16 +126,11 @@ public class DescriptionStore {
 		return null;
 	}
 
-	public void addCredentialDescription(CredentialDescription cd)
-			throws InfoException {
-		Integer id = new Integer(cd.getId());
-		if (credentialDescriptions.containsKey(id)) {
-			CredentialDescription other = credentialDescriptions.get(id);
-			throw new InfoException("Cannot add credential " + cd.getName()
-					+ ". Credential " + other.getCredentialID() + " of issuer "
-					+ other.getIssuerID() + " has the same id (" + id + ").");
+	public void addCredentialDescription(CredentialDescription cd) throws InfoException {
+		if (credentialDescriptions.containsKey(cd.getIdentifier())) {
+			throw new InfoException("Cannot add credential " + cd.getIdentifier() + ", already exists");
 		}
-		credentialDescriptions.put(id, cd);
+		credentialDescriptions.put(cd.getIdentifier(), cd);
 	}
 	
 	public IssuerDescription getIssuerDescription(String name) {

@@ -54,8 +54,8 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 
 	private HashMap<String,Boolean> attributeDisclosed;
 
-	private CredentialDescription credentialDescription;
-	private IssuerDescription issuerDescription;
+	private transient CredentialDescription credentialDescription;
+	private transient IssuerDescription issuerDescription;
 
 	/**
 	 * The identifier of the verifier, this corresponds to the directory name in

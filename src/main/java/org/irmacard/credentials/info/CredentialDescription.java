@@ -43,17 +43,15 @@ import org.w3c.dom.NodeList;
 
 public class CredentialDescription extends ConfigurationParser implements Serializable {
 	private static final long serialVersionUID = -8465573145896355885L;
-	String description;
-	String name;
-	String shortName;
-	String issuerID;
-	String credentialID;
-	short id;
+	private String description;
+	private String name;
+	private String shortName;
+	private String issuerID;
+	private String credentialID;
+	private short id;
 
-	URI path;
-
-	ArrayList<AttributeDescription> attributes;
-	private IssuerDescription issuerDescription;
+	private ArrayList<AttributeDescription> attributes;
+	private transient IssuerDescription issuerDescription;
 	
 	/**
 	 * Create new credential description from file

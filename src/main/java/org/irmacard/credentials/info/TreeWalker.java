@@ -58,9 +58,11 @@ public class TreeWalker implements TreeWalkerI {
 		}
 	}
 
-	public void parseConfiguration(DescriptionStore descriptionStore)
+	@Override
+	public DescriptionStore parseConfiguration()
 			throws InfoException {
-		this.descriptionStore = descriptionStore;
+		descriptionStore = new DescriptionStore();
+
 		File[] files = new File(CORE_LOCATION).listFiles();
 		try {
 			for (File f : files) {
@@ -71,6 +73,8 @@ public class TreeWalker implements TreeWalkerI {
 		} catch (InfoException e) {
 			throw new InfoException("Error processing file: " + currentFile, e);
 		}
+
+		return descriptionStore;
 	}
 
 	private void tryProcessIssuer(File f) throws InfoException {

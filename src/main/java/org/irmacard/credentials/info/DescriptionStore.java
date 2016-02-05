@@ -30,6 +30,14 @@
 
 package org.irmacard.credentials.info;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,9 +49,12 @@ import java.util.HashMap;
 public class DescriptionStore {
 	static URI CORE_LOCATION;
 	static TreeWalkerI treeWalker;
-	
+	static DescriptionStoreSerializer serializer;
+	static HttpClient httpClient;
+
 	static DescriptionStore ds;
-	
+
+	HashMap<String,SchemeManager> schemeManagers = new HashMap<>();
 	HashMap<String,CredentialDescription> credentialDescriptions = new HashMap<String, CredentialDescription>();
 	HashMap<String,IssuerDescription> issuerDescriptions = new HashMap<String, IssuerDescription>();
 	HashMap<Integer,VerificationDescription> verificationDescriptions = new HashMap<Integer, VerificationDescription>();
@@ -67,29 +78,35 @@ public class DescriptionStore {
 		DescriptionStore.treeWalker = treeWalker;
 	}
 
+	public static void setSerializer(DescriptionStoreSerializer serializer) {
+		DescriptionStore.serializer = serializer;
+	}
+
+	public static void setHttpClient(HttpClient client) {
+		DescriptionStore.httpClient = client;
+	}
+
 	/**
 	 * Get DescriptionStore instance
 	 * 
 	 * @return The DescriptionStore instance
-	 * @throws Exception if CoreLocation has not been set
+	 * @throws InfoException if deserializing the store failed
 	 */
 	public static DescriptionStore getInstance() throws InfoException {
 		if(ds == null) {
-			ds = new DescriptionStore();
+			if(CORE_LOCATION != null) {
+				treeWalker = new TreeWalker(CORE_LOCATION);
+			}
+
+			if (treeWalker != null) {
+				ds = treeWalker.parseConfiguration();
+			}
 		}
 
 		return ds;
 	}
 
-	private DescriptionStore() throws InfoException {
-		if(CORE_LOCATION != null) {
-			treeWalker = new TreeWalker(CORE_LOCATION);
-		}
-
-		if (treeWalker != null) {
-			treeWalker.parseConfiguration(this);
-		}
-	}
+	public DescriptionStore() {}
 
 	public static boolean isLocationSet() {
 		return CORE_LOCATION != null;
@@ -199,5 +216,110 @@ public class DescriptionStore {
 			}
 		}
 		return result;
+	}
+
+	public SchemeManager getSchemeManager(String name) {
+		return schemeManagers.get(name);
+	}
+
+	public void addSchemeManager(SchemeManager manager) {
+		schemeManagers.put(manager.getName(), manager);
+	}
+
+	public SchemeManager removeSchemeManager(String name) {
+		return schemeManagers.remove(name);
+	}
+
+	public CredentialDescription downloadCredentialDescription(String identifier) throws IOException, InfoException {
+		return downloadCredentialDescription(identifier, true);
+	}
+
+	public CredentialDescription downloadCredentialDescription(String identifier, boolean shouldSave)
+	throws IOException, InfoException {
+		String[] parts = identifier.split("\\.");
+		String issuer = parts[0];
+		String credential = parts[1];
+
+		if (ds.getIssuerDescription(issuer) == null)
+			downloadIssuerDescription(issuer, false);
+
+		SchemeManager manager = schemeManagers.get("default");
+		if (manager == null)
+			throw new InfoException("Unknown scheme manager");
+		String url = manager.getUrl() + issuer + "/Issues/" + credential + "/description.xml";
+
+		InputStream stream = doHttpRequest(url);
+
+		CredentialDescription cd = new CredentialDescription(stream);
+		try {
+			ds.addCredentialDescription(cd);
+		} catch (InfoException e) { // Thrown if it already exists
+			return null;
+		}
+
+		if (shouldSave)
+			save();
+
+		return cd;
+	}
+
+	public IssuerDescription downloadIssuerDescription(String name) throws IOException, InfoException {
+		return downloadIssuerDescription(name, true);
+	}
+
+	public IssuerDescription downloadIssuerDescription(String name, boolean shouldSave)
+	throws IOException, InfoException {
+		SchemeManager manager = schemeManagers.get("default");
+		if (manager == null)
+			throw new InfoException("Unknown scheme manager");
+		String url = manager.getUrl() + name + "/description.xml";
+
+		InputStream stream = doHttpRequest(url);
+
+		IssuerDescription issuer = new IssuerDescription(stream);
+		try {
+			ds.addIssuerDescription(issuer);
+		} catch (InfoException e) { // Thrown if it already exists
+			return null;
+		}
+
+		if (shouldSave)
+			save();
+
+		return issuer;
+	}
+
+	protected void save() {
+		if (serializer != null)
+			serializer.saveDescriptionStore(this);
+	}
+
+	public static InputStream doHttpRequest(String url) throws IOException {
+		HttpResponse response = httpClient.execute(new HttpGet(url));
+		int status = response.getStatusLine().getStatusCode();
+		if (status == 404)
+			return null;
+
+		InputStream stream = response.getEntity().getContent();
+		if (status == 200) {
+			return stream;
+		} else {
+			throw new IOException("Server returned "
+					+ status + " "
+					+ response.getStatusLine().getReasonPhrase() + ":\n"
+					+ inputStreamToString(stream));
+		}
+	}
+
+	private static String inputStreamToString(InputStream is) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		StringBuilder sb = new StringBuilder();
+		String line;
+		while ((line = br.readLine()) != null)
+			sb.append(line).append("\n");
+
+		br.close();
+		is.close();
+		return sb.toString();
 	}
 }

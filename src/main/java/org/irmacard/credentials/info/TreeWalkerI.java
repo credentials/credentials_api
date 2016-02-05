@@ -40,7 +40,7 @@ public interface TreeWalkerI {
 	 * into the DescriptionStore 
 	 * @throws InfoException
 	 */
-	public void parseConfiguration(DescriptionStore ds) throws InfoException;
+	public DescriptionStore parseConfiguration() throws InfoException;
 
 	/**
 	 * Retrieve an InputStream for the given path in the configuration tree. Note that the

@@ -43,21 +43,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
-/**
- * TODO: Change print statements to proper Logging statements
- */
+@SuppressWarnings("unused")
 public class DescriptionStore {
-	static URI CORE_LOCATION;
-	static TreeWalkerI treeWalker;
-	static DescriptionStoreSerializer serializer;
-	static HttpClient httpClient;
+	private static URI CORE_LOCATION;
+	private static TreeWalkerI treeWalker;
+	private static DescriptionStoreSerializer serializer;
+	private static HttpClient httpClient;
 
-	static DescriptionStore ds;
+	private static DescriptionStore ds;
 
-	HashMap<String,SchemeManager> schemeManagers = new HashMap<>();
-	HashMap<String,CredentialDescription> credentialDescriptions = new HashMap<String, CredentialDescription>();
-	HashMap<String,IssuerDescription> issuerDescriptions = new HashMap<String, IssuerDescription>();
-	HashMap<Integer,VerificationDescription> verificationDescriptions = new HashMap<Integer, VerificationDescription>();
+	private HashMap<String,SchemeManager> schemeManagers = new HashMap<>();
+	private HashMap<String,CredentialDescription> credentialDescriptions = new HashMap<>();
+	private HashMap<String,IssuerDescription> issuerDescriptions = new HashMap<>();
+	private HashMap<Short,VerificationDescription> verificationDescriptions = new HashMap<>();
 
 	/**
 	 * Define the CoreLocation. This has to be set before using the 
@@ -72,7 +70,6 @@ public class DescriptionStore {
 	 * Define the TreeWalker. This allows crawling more difficult storage systems,
 	 * like Android's. This has to be set before using the DescriptionStore or define
 	 * a coreLocation instead.
-	 * @param treeWalker
 	 */
 	public static void setTreeWalker(TreeWalkerI treeWalker) {
 		DescriptionStore.treeWalker = treeWalker;
@@ -172,7 +169,7 @@ public class DescriptionStore {
 
 	public void addVerificationDescription(VerificationDescription vd)
 			throws InfoException {
-		Integer id = new Integer(vd.getID());
+		short id = vd.getID();
 		if (verificationDescriptions.containsKey(id)) {
 			VerificationDescription other = verificationDescriptions.get(id);
 			throw new InfoException("Cannot add verification "
@@ -182,16 +179,16 @@ public class DescriptionStore {
 					+ other.getVerifierID() + " shares the same id ("
 					+ id + ").");
 		}
-		verificationDescriptions.put(new Integer(vd.getID()), vd);
+		verificationDescriptions.put(id, vd);
 	}
 
 	public void updateVerificationDescription(VerificationDescription vd)
 			throws InfoException {
-		Integer id = new Integer(vd.getID());
+		short id = vd.getID();
 		if (verificationDescriptions.containsKey(id)) {
 			verificationDescriptions.remove(id);
 		}
-		verificationDescriptions.put(new Integer(vd.getID()), vd);
+		verificationDescriptions.put(id, vd);
 	}
 	
 	public Collection<IssuerDescription> getIssuerDescriptions() {
@@ -199,7 +196,7 @@ public class DescriptionStore {
 	}
 	
 	public Collection<VerificationDescription> getVerificationDescriptionsForVerifier(String verifierID) {
-		ArrayList<VerificationDescription> result = new ArrayList<VerificationDescription>();
+		ArrayList<VerificationDescription> result = new ArrayList<>();
 		for (VerificationDescription vd : verificationDescriptions.values()) {
 			if (vd.getVerifierID().equals(verifierID)) {
 				result.add(vd);
@@ -209,7 +206,7 @@ public class DescriptionStore {
 	}
 	
 	public Collection<VerificationDescription> getVerificationDescriptionsForVerifier(IssuerDescription verifier) {
-		ArrayList<VerificationDescription> result = new ArrayList<VerificationDescription>();
+		ArrayList<VerificationDescription> result = new ArrayList<>();
 		for (VerificationDescription vd : verificationDescriptions.values()) {
 			if (vd.getVerifierID().equals(verifier.getID())) {
 				result.add(vd);

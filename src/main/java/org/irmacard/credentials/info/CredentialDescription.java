@@ -30,9 +30,11 @@
 
 package org.irmacard.credentials.info;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -73,6 +75,10 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 		super();
 		Document d = parse(stream);
 		init(d);
+	}
+
+	public CredentialDescription(String xml) throws InfoException {
+		this(new ByteArrayInputStream(xml.getBytes()));
 	}
 
 	private void init(Document d) throws InfoException {

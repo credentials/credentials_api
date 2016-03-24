@@ -35,10 +35,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.net.URI;
 
-import org.irmacard.credentials.info.CredentialDescription;
-import org.irmacard.credentials.info.DescriptionStore;
-import org.irmacard.credentials.info.InfoException;
-import org.irmacard.credentials.info.VerificationDescription;
+import org.irmacard.credentials.info.*;
 import org.junit.Test;
 
 
@@ -64,8 +61,7 @@ public class TestBasicParse {
 	
 	@Test
 	public void initializeDescriptionStore() throws InfoException {
-		DescriptionStore.setCoreLocation(core);
-		DescriptionStore.getInstance();
+		DescriptionStore.initialize(new DescriptionStoreDeserializer(core));
 	}
 	
 	@Test

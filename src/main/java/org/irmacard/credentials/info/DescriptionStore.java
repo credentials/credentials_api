@@ -38,15 +38,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
 @SuppressWarnings("unused")
 public class DescriptionStore {
-	private static URI CORE_LOCATION;
-	private static TreeWalkerI treeWalker;
+	private static DescriptionStoreDeserializer deserializer;
 	private static DescriptionStoreSerializer serializer;
 	private static HttpClient httpClient;
 
@@ -57,22 +55,8 @@ public class DescriptionStore {
 	private HashMap<String,IssuerDescription> issuerDescriptions = new HashMap<>();
 	private HashMap<Short,VerificationDescription> verificationDescriptions = new HashMap<>();
 
-	/**
-	 * Define the CoreLocation. This has to be set before using the 
-	 * DescriptionStore or define a TreeWalker instead.
-	 * @param coreLocation Location of configuration files.
-	 */
-	public static void setCoreLocation(URI coreLocation) {
-		CORE_LOCATION = coreLocation;
-	}
-	
-	/**
-	 * Define the TreeWalker. This allows crawling more difficult storage systems,
-	 * like Android's. This has to be set before using the DescriptionStore or define
-	 * a coreLocation instead.
-	 */
-	public static void setTreeWalker(TreeWalkerI treeWalker) {
-		DescriptionStore.treeWalker = treeWalker;
+	public static void setDeserializer(DescriptionStoreDeserializer deserializer) {
+		DescriptionStore.deserializer = deserializer;
 	}
 
 	public static void setSerializer(DescriptionStoreSerializer serializer) {
@@ -83,6 +67,30 @@ public class DescriptionStore {
 		DescriptionStore.httpClient = client;
 	}
 
+	public static void initialize(DescriptionStoreDeserializer deserializer,
+	                              DescriptionStoreSerializer serializer,
+	                              HttpClient client) throws InfoException {
+		DescriptionStore.deserializer = deserializer;
+		DescriptionStore.serializer = serializer;
+		DescriptionStore.httpClient = client;
+		initialize();
+	}
+
+	public static void initialize(DescriptionStoreDeserializer deserializer) throws InfoException {
+		DescriptionStore.deserializer = deserializer;
+		initialize();
+	}
+
+	public static void initialize() throws InfoException {
+		ds = new DescriptionStore();
+		if (deserializer != null)
+			new TreeWalker(deserializer).parseConfiguration(ds);
+	}
+
+	public static boolean isInitialized() {
+		return ds != null;
+	}
+
 	/**
 	 * Get DescriptionStore instance
 	 * 
@@ -90,25 +98,14 @@ public class DescriptionStore {
 	 * @throws InfoException if deserializing the store failed
 	 */
 	public static DescriptionStore getInstance() throws InfoException {
-		if(ds == null) {
-			if(CORE_LOCATION != null) {
-				treeWalker = new TreeWalker(CORE_LOCATION);
-			}
-
-			if (treeWalker != null) {
-				ds = treeWalker.parseConfiguration();
-			}
-		}
+		if(ds == null)
+			initialize();
 
 		return ds;
 	}
 
-	public DescriptionStore() {}
+	private DescriptionStore() {}
 
-	public static boolean isLocationSet() {
-		return CORE_LOCATION != null;
-	}
-	
 	public CredentialDescription getCredentialDescription(short id) {
 		for (CredentialDescription cd : credentialDescriptions.values()) {
 			if (cd.getId() == id) {
@@ -228,74 +225,50 @@ public class DescriptionStore {
 	}
 
 	public CredentialDescription downloadCredentialDescription(String identifier) throws IOException, InfoException {
-		return downloadCredentialDescription(identifier, true);
-	}
-
-	public CredentialDescription downloadCredentialDescription(String identifier, boolean shouldSave)
-	throws IOException, InfoException {
 		String[] parts = identifier.split("\\.");
 		String issuer = parts[0];
 		String credential = parts[1];
 
 		if (ds.getIssuerDescription(issuer) == null)
-			downloadIssuerDescription(issuer, false);
+			downloadIssuerDescription(issuer);
 
 		SchemeManager manager = schemeManagers.get("default");
 		if (manager == null)
 			throw new InfoException("Unknown scheme manager");
 		String url = manager.getUrl() + issuer + "/Issues/" + credential + "/description.xml";
 
-		InputStream stream = doHttpRequest(url);
+		String cdXml = inputStreamToString(doHttpRequest(url));
+		CredentialDescription cd = new CredentialDescription(cdXml);
+		addCredentialDescription(cd);
 
-		CredentialDescription cd = new CredentialDescription(stream);
-		try {
-			ds.addCredentialDescription(cd);
-		} catch (InfoException e) { // Thrown if it already exists
-			return null;
-		}
-
-		if (shouldSave)
-			save();
+		if (serializer != null)
+			serializer.saveCredentialDescription(cd, cdXml);
 
 		return cd;
 	}
 
 	public IssuerDescription downloadIssuerDescription(String name) throws IOException, InfoException {
-		return downloadIssuerDescription(name, true);
-	}
-
-	public IssuerDescription downloadIssuerDescription(String name, boolean shouldSave)
-	throws IOException, InfoException {
 		SchemeManager manager = schemeManagers.get("default");
 		if (manager == null)
 			throw new InfoException("Unknown scheme manager");
-		String url = manager.getUrl() + name + "/description.xml";
+		String url = manager.getUrl() + name;
 
-		InputStream stream = doHttpRequest(url);
+		String issuerXml = inputStreamToString(doHttpRequest(url + "/description.xml"));
+		IssuerDescription issuer = new IssuerDescription(issuerXml);
+		addIssuerDescription(issuer);
 
-		IssuerDescription issuer = new IssuerDescription(stream);
-		try {
-			ds.addIssuerDescription(issuer);
-		} catch (InfoException e) { // Thrown if it already exists
-			return null;
-		}
-
-		if (shouldSave)
-			save();
+		InputStream logo = doHttpRequest(url + "/logo.png");
+		if (serializer != null)
+			serializer.saveIssuerDescription(issuer, issuerXml, logo);
 
 		return issuer;
-	}
-
-	protected void save() {
-		if (serializer != null)
-			serializer.saveDescriptionStore(this);
 	}
 
 	public static InputStream doHttpRequest(String url) throws IOException {
 		HttpResponse response = httpClient.execute(new HttpGet(url));
 		int status = response.getStatusLine().getStatusCode();
 		if (status == 404)
-			return null;
+			throw new IOException("404: File not found");
 
 		InputStream stream = response.getEntity().getContent();
 		if (status == 200) {
@@ -308,7 +281,7 @@ public class DescriptionStore {
 		}
 	}
 
-	private static String inputStreamToString(InputStream is) throws IOException {
+	public static String inputStreamToString(InputStream is) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(is));
 		StringBuilder sb = new StringBuilder();
 		String line;

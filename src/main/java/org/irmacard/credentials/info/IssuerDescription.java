@@ -30,9 +30,11 @@
 
 package org.irmacard.credentials.info;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 import org.w3c.dom.Document;
 
@@ -95,6 +97,10 @@ public class IssuerDescription extends ConfigurationParser implements Serializab
 		super();
 		Document d = parse(stream);
 		init(d);
+	}
+
+	public IssuerDescription(String xml) throws InfoException {
+		this(new ByteArrayInputStream(xml.getBytes()));
 	}
 
 	private void init(Document d) throws InfoException {

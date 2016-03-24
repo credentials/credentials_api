@@ -30,102 +30,54 @@
 
 package org.irmacard.credentials.info;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URI;
 
-public class TreeWalker implements TreeWalkerI {
-	URI CORE_LOCATION;
-	DescriptionStore descriptionStore;
-	IssuerDescription currentIssuer;
+public class TreeWalker {
+	FileReader fileReader;
+	DescriptionStoreDeserializer deserializer;
 
-	// Used for reporting exceptions
-	private URI currentFile;
-
-	public TreeWalker(URI coreLocation) {
-		CORE_LOCATION = coreLocation;
+	public TreeWalker(DescriptionStoreDeserializer deserializer) {
+		this.deserializer = deserializer;
+		this.fileReader = deserializer.getFileReader();
 	}
 
-	public InputStream retrieveFile(URI path) throws InfoException {
-		try {
-			return CORE_LOCATION.resolve(path).toURL().openStream();
-		} catch (MalformedURLException e) {
-			throw new InfoException("Tried to read file " + path, e);
-		} catch (IOException e) {
-			throw new InfoException("Tried to read file " + path, e);
-		}
-	}
+	public void parseConfiguration(DescriptionStore store) throws InfoException {
+		String[] files = fileReader.list("");
 
-	@Override
-	public DescriptionStore parseConfiguration()
-			throws InfoException {
-		descriptionStore = new DescriptionStore();
+		for (String issuerPath : files) {
+			if (fileReader.isEmpty(issuerPath) || !fileReader.containsFile(issuerPath, "description.xml"))
+				continue;
 
-		File[] files = new File(CORE_LOCATION).listFiles();
-		try {
-			for (File f : files) {
-				if (f.isDirectory()) {
-					tryProcessIssuer(f);
-				}
-			}
-		} catch (InfoException e) {
-			throw new InfoException("Error processing file: " + currentFile, e);
-		}
+			// Since issuerPath contains description.xml, it is an issuer
+			store.addIssuerDescription(deserializer.loadIssuerDescription(issuerPath));
 
-		return descriptionStore;
-	}
+			tryProcessVerifications(issuerPath, store);
 
-	private void tryProcessIssuer(File f) throws InfoException {
-		// Determine whether we should process this directory.
-		File config = new File(f.toURI().resolve("description.xml"));
-		if(config.exists()) {
-			currentFile = config.toURI();
-			currentIssuer = new IssuerDescription(config.toURI());
-			descriptionStore.addIssuerDescription(currentIssuer);
+			// Load any credential types it might have
+			String[] credentialTypePaths = fileReader.list(issuerPath + "/Issues");
+			if (credentialTypePaths == null)
+				continue;
 
-			// Process credentials issued by this issuer
-			tryProcessCredentials(f);
-
-			// Process verification descriptions
-			tryProcessVerifications(f);
-		}
-	}
-
-	private void tryProcessCredentials(File f) throws InfoException {
-		File credentials = new File(f.toURI().resolve("Issues"));
-		if(credentials.exists()) {
-			for (File c : credentials.listFiles()) {
-				URI credentialspec = c.toURI().resolve("description.xml");
-				if((new File(credentialspec)).exists()) {
-					currentFile = credentialspec;
-					CredentialDescription cd = new CredentialDescription(
-							credentialspec);
-					descriptionStore.addCredentialDescription(cd);
-				} else {
-					System.out
-							.println("Expected new form credential description");
-				}
+			for (String credTypePath : credentialTypePaths) {
+				String identifier = issuerPath + "." + credTypePath;
+				if (!deserializer.containsCredentialDescription(identifier))
+					continue;
+				store.addCredentialDescription(deserializer.loadCredentialDescription(identifier));
 			}
 		}
 	}
 
-	private void tryProcessVerifications(File f) throws InfoException {
-		File verifications = new File(f.toURI().resolve("Verifies"));
-		if(verifications.exists()) {
-			for (File v : verifications.listFiles()) {
-				URI verification = v.toURI().resolve("description.xml");
-				if((new File(verification)).exists()) {
-					currentFile = verification;
-					VerificationDescription vd = new VerificationDescription(
-							verification);
-					descriptionStore.addVerificationDescription(vd);
-				} else {
-					System.out
-							.println("Expected new form verification description");
-				}
-			}
+	private void tryProcessVerifications(String issuerPath, DescriptionStore store) throws InfoException {
+		String path = issuerPath + "/Verifies";
+		String[] verifications = fileReader.list(path);
+		if (verifications == null || verifications.length == 0)
+			return;
+
+		for (String verification : verifications) {
+			if (!deserializer.containsVerificationDescription(issuerPath, verification))
+				continue;
+			InputStream stream = fileReader.retrieveFile(path + "/" + verification + "/description.xml");
+			store.addVerificationDescription(new VerificationDescription(stream));
 		}
 	}
 }

@@ -34,7 +34,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,6 +50,7 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 	private String issuerID;
 	private String credentialID;
 	private short id;
+	private CredentialIdentifier identifier;
 
 	private ArrayList<AttributeDescription> attributes;
 	private transient IssuerDescription issuerDescription;
@@ -88,6 +88,8 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 		issuerID = getFirstTagText(d, "IssuerID");
 		credentialID = getFirstTagText(d, "CredentialID");
 		id = (short) Integer.parseInt(getFirstTagText(d, "Id"));
+
+		identifier = new CredentialIdentifier(new IssuerIdentifier(issuerID), credentialID);
 
 		NodeList attrList = ((Element) d.getElementsByTagName("Attributes")
 				.item(0)).getElementsByTagName("Attribute");
@@ -146,10 +148,10 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 	}
 
 	/**
-	 * Get the full identifier for this credential.
+	 * Get the identifier for this credential type.
 	 */
-	public String getIdentifier() {
-		return issuerID + "." + credentialID;
+	public CredentialIdentifier getIdentifier() {
+		return identifier;
 	}
 
 	/**
@@ -210,12 +212,7 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 	 */
 	public IssuerDescription getIssuerDescription() {
 		if(issuerDescription == null) {
-			try {
-				issuerDescription = DescriptionStore.getInstance().getIssuerDescription(issuerID);
-			} catch (InfoException e) {
-				// FIXME: for now ignore errors due to missing DescriptionStore
-				e.printStackTrace();
-			}
+			issuerDescription = getIdentifier().getIssuerIdentifier().getIssuerDescription();
 		}
 		return issuerDescription;
 	}

@@ -51,8 +51,8 @@ public class DescriptionStore {
 	private static DescriptionStore ds;
 
 	private HashMap<String,SchemeManager> schemeManagers = new HashMap<>();
-	private HashMap<String,CredentialDescription> credentialDescriptions = new HashMap<>();
-	private HashMap<String,IssuerDescription> issuerDescriptions = new HashMap<>();
+	private HashMap<CredentialIdentifier,CredentialDescription> credentialDescriptions = new HashMap<>();
+	private HashMap<IssuerIdentifier,IssuerDescription> issuerDescriptions = new HashMap<>();
 	private HashMap<Short,VerificationDescription> verificationDescriptions = new HashMap<>();
 
 	public static void setDeserializer(DescriptionStoreDeserializer deserializer) {
@@ -106,6 +106,8 @@ public class DescriptionStore {
 
 	private DescriptionStore() {}
 
+	@Deprecated
+	/** Use {@link #getCredentialDescription(CredentialIdentifier)} instead */
 	public CredentialDescription getCredentialDescription(short id) {
 		for (CredentialDescription cd : credentialDescriptions.values()) {
 			if (cd.getId() == id) {
@@ -116,12 +118,20 @@ public class DescriptionStore {
 		return null;
 	}
 
-	public CredentialDescription getCredentialDescription(String identifier) {
+	public CredentialDescription getCredentialDescription(CredentialIdentifier identifier) {
 		return credentialDescriptions.get(identifier);
 	}
 
+	/** Use {@link #getCredentialDescription(CredentialIdentifier)} instead */
+	@Deprecated
+	public CredentialDescription getCredentialDescription(String identifier) {
+		return credentialDescriptions.get(new CredentialIdentifier(identifier));
+	}
+
+	/** Use {@link #getCredentialDescription(CredentialIdentifier)} instead */
+	@Deprecated
 	public CredentialDescription getCredentialDescriptionByName(String issuer, String credID) {
-		return getCredentialDescription(issuer + "." + credID);
+		return getCredentialDescription(new CredentialIdentifier(new IssuerIdentifier(issuer), credID));
 	}
 
 	public VerificationDescription getVerificationDescriptionByName(
@@ -143,25 +153,30 @@ public class DescriptionStore {
 		}
 		credentialDescriptions.put(cd.getIdentifier(), cd);
 	}
-	
-	public IssuerDescription getIssuerDescription(String name) {
-		return issuerDescriptions.get(name);
+
+	public IssuerDescription getIssuerDescription(IssuerIdentifier identifier) {
+		return issuerDescriptions.get(identifier);
+	}
+
+	@Deprecated
+	public IssuerDescription getIssuerDescription(String identifier) {
+		return issuerDescriptions.get(new IssuerIdentifier(identifier));
 	}
 
 	public void addIssuerDescription(IssuerDescription id) throws InfoException {
-		if (issuerDescriptions.containsKey(id.getID())) {
+		if (issuerDescriptions.containsKey(id.getIdentifier())) {
 			throw new InfoException("Cannot add issuer " + id.getName()
 					+ ". An issuer with the id " + id.getID()
 					+ " already exists.");
 		}
-		issuerDescriptions.put(id.getID(), id);
+		issuerDescriptions.put(id.getIdentifier(), id);
 	}
 
 	public void updateIssuerDescription(IssuerDescription id) {
-		if (issuerDescriptions.containsKey(id.getID())) {
-			issuerDescriptions.remove(id.getID());
+		if (issuerDescriptions.containsKey(id.getIdentifier())) {
+			issuerDescriptions.remove(id.getIdentifier());
 		}
-		issuerDescriptions.put(id.getID(), id);
+		issuerDescriptions.put(id.getIdentifier(), id);
 	}
 
 	public void addVerificationDescription(VerificationDescription vd)
@@ -191,7 +206,7 @@ public class DescriptionStore {
 	public Collection<IssuerDescription> getIssuerDescriptions() {
 		return issuerDescriptions.values();
 	}
-	
+
 	public Collection<VerificationDescription> getVerificationDescriptionsForVerifier(String verifierID) {
 		ArrayList<VerificationDescription> result = new ArrayList<>();
 		for (VerificationDescription vd : verificationDescriptions.values()) {
@@ -224,18 +239,17 @@ public class DescriptionStore {
 		return schemeManagers.remove(name);
 	}
 
-	public CredentialDescription downloadCredentialDescription(String identifier) throws IOException, InfoException {
-		String[] parts = identifier.split("\\.");
-		String issuer = parts[0];
-		String credential = parts[1];
+	public CredentialDescription downloadCredentialDescription(CredentialIdentifier identifier)
+	throws IOException, InfoException {
+		IssuerIdentifier issuer = identifier.getIssuerIdentifier();
 
-		if (ds.getIssuerDescription(issuer) == null)
+		if (getIssuerDescription(issuer) == null)
 			downloadIssuerDescription(issuer);
 
-		SchemeManager manager = schemeManagers.get("default");
+		SchemeManager manager = schemeManagers.get(issuer.getSchemeManagerName());
 		if (manager == null)
 			throw new InfoException("Unknown scheme manager");
-		String url = manager.getUrl() + issuer + "/Issues/" + credential + "/description.xml";
+		String url = manager.getUrl() + identifier.getPath(true);
 
 		String cdXml = inputStreamToString(doHttpRequest(url));
 		CredentialDescription cd = new CredentialDescription(cdXml);
@@ -247,21 +261,21 @@ public class DescriptionStore {
 		return cd;
 	}
 
-	public IssuerDescription downloadIssuerDescription(String name) throws IOException, InfoException {
-		SchemeManager manager = schemeManagers.get("default");
+	public IssuerDescription downloadIssuerDescription(IssuerIdentifier issuer) throws IOException, InfoException {
+		SchemeManager manager = schemeManagers.get(issuer.getSchemeManagerName());
 		if (manager == null)
 			throw new InfoException("Unknown scheme manager");
-		String url = manager.getUrl() + name;
+		String url = manager.getUrl() + issuer.getPath(false);
 
 		String issuerXml = inputStreamToString(doHttpRequest(url + "/description.xml"));
-		IssuerDescription issuer = new IssuerDescription(issuerXml);
-		addIssuerDescription(issuer);
+		IssuerDescription id = new IssuerDescription(issuerXml);
+		addIssuerDescription(id);
 
 		InputStream logo = doHttpRequest(url + "/logo.png");
 		if (serializer != null)
-			serializer.saveIssuerDescription(issuer, issuerXml, logo);
+			serializer.saveIssuerDescription(id, issuerXml, logo);
 
-		return issuer;
+		return id;
 	}
 
 	public static InputStream doHttpRequest(String url) throws IOException {

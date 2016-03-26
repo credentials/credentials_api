@@ -45,11 +45,15 @@ public class TreeWalker {
 		String[] files = fileReader.list("");
 
 		for (String issuerPath : files) {
-			if (fileReader.isEmpty(issuerPath) || !fileReader.containsFile(issuerPath, "description.xml"))
+			if (issuerPath.startsWith(".") || fileReader.isEmpty(issuerPath))
+				continue;
+
+			IssuerIdentifier issuer = new IssuerIdentifier(issuerPath);
+			if (!deserializer.containsIssuerDescription(issuer))
 				continue;
 
 			// Since issuerPath contains description.xml, it is an issuer
-			store.addIssuerDescription(deserializer.loadIssuerDescription(issuerPath));
+			store.addIssuerDescription(deserializer.loadIssuerDescription(issuer));
 
 			tryProcessVerifications(issuerPath, store);
 
@@ -59,7 +63,9 @@ public class TreeWalker {
 				continue;
 
 			for (String credTypePath : credentialTypePaths) {
-				String identifier = issuerPath + "." + credTypePath;
+				if (credTypePath.startsWith("."))
+					continue;
+				CredentialIdentifier identifier = new CredentialIdentifier(issuer, credTypePath);
 				if (!deserializer.containsCredentialDescription(identifier))
 					continue;
 				store.addCredentialDescription(deserializer.loadCredentialDescription(identifier));

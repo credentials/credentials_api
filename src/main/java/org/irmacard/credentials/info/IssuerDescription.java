@@ -34,7 +34,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 
 import org.w3c.dom.Document;
 
@@ -45,6 +44,7 @@ public class IssuerDescription extends ConfigurationParser implements Serializab
 	private String contactAddress;
 	private String contactEMail;
 	private String baseURL;
+	private IssuerIdentifier identifier;
 	
 	/**
 	 * Full human readable name of the issuer. For example this could be "Radboud University".
@@ -60,6 +60,10 @@ public class IssuerDescription extends ConfigurationParser implements Serializab
 	 */
 	public String getID() {
 		return id;
+	}
+
+	public IssuerIdentifier getIdentifier() {
+		return identifier;
 	}
 
 	/**
@@ -109,6 +113,7 @@ public class IssuerDescription extends ConfigurationParser implements Serializab
 		contactAddress = getFirstTagText(d, "ContactAddress");
 		contactEMail = getFirstTagText(d, "ContactEMail");
 		baseURL = getFirstTagText(d, "baseURL");
+		identifier = new IssuerIdentifier(id);
 	}
 
 	public String toString() {

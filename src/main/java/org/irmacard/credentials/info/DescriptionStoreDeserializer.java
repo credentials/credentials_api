@@ -14,31 +14,20 @@ public class DescriptionStoreDeserializer {
 		this.reader = reader;
 	}
 
-	public boolean containsCredentialDescription(String identifier) {
-		// TODO move to a credential identifier class
-		String[] parts = identifier.split("\\.");
-		String issuer = parts[0];
-		String credential = parts[1];
-
-		return reader.containsFile(issuer + "/Issues/" + credential, "description.xml");
+	public boolean containsCredentialDescription(CredentialIdentifier identifier) {
+		return reader.containsFile(identifier.getPath(false), "description.xml");
 	}
 
-	public CredentialDescription loadCredentialDescription(String identifier) throws InfoException {
-		String[] parts = identifier.split("\\.");
-		String issuer = parts[0];
-		String credential = parts[1];
-		String path = issuer + "/Issues/" + credential + "/description.xml";
-
-		return new CredentialDescription(reader.retrieveFile(path));
+	public CredentialDescription loadCredentialDescription(CredentialIdentifier identifier) throws InfoException {
+		return new CredentialDescription(reader.retrieveFile(identifier.getPath(true)));
 	}
 
-	public boolean containsIssuerDescription(String name) {
-		return reader.containsFile(name, "/description.xml");
+	public boolean containsIssuerDescription(IssuerIdentifier identifier) {
+		return reader.containsFile(identifier.getPath(false), "description.xml");
 	}
 
-	public IssuerDescription loadIssuerDescription(String name) throws InfoException {
-		String path = name + "/description.xml";
-		return new IssuerDescription(reader.retrieveFile(path));
+	public IssuerDescription loadIssuerDescription(IssuerIdentifier identifier) throws InfoException {
+		return new IssuerDescription(reader.retrieveFile(identifier.getPath(true)));
 	}
 
 	public boolean containsVerificationDescription(String issuer, String name) {

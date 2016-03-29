@@ -44,6 +44,7 @@ public class IssuerDescription extends ConfigurationParser implements Serializab
 	private String contactAddress;
 	private String contactEMail;
 	private String baseURL;
+	private String schemeManager;
 	private IssuerIdentifier identifier;
 	
 	/**
@@ -113,7 +114,8 @@ public class IssuerDescription extends ConfigurationParser implements Serializab
 		contactAddress = getFirstTagText(d, "ContactAddress");
 		contactEMail = getFirstTagText(d, "ContactEMail");
 		baseURL = getFirstTagText(d, "baseURL");
-		identifier = new IssuerIdentifier(id);
+		schemeManager = getFirstTagText(d, "SchemeManager");
+		identifier = new IssuerIdentifier(schemeManager, id);
 	}
 
 	public String toString() {

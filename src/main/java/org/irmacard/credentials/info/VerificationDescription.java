@@ -47,6 +47,9 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 
 	private String issuerID;
 	private String credentialID;
+	private String schemeManager;
+	private CredentialIdentifier credentialIdentifier;
+	private IssuerIdentifier verifierIdentifier;
 
 	private String name;
 	private String description;
@@ -143,6 +146,10 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 		credentialID = getFirstTagText(d, "CredentialID");
 		verifierID = getFirstTagText(d, "VerifierID");
 		verificationID = getFirstTagText(d, "VerificationID");
+		schemeManager = getFirstTagText(d, "SchemeManager");
+
+		credentialIdentifier = new CredentialIdentifier(schemeManager, issuerID, credentialID);
+		verifierIdentifier = new IssuerIdentifier(schemeManager, verifierID);
 
 		description = getFirstTagText(d, "Description");
 
@@ -198,6 +205,18 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 		return ret + "]";
 	}
 
+	public IssuerIdentifier getIssuerIdentifier() {
+		return credentialIdentifier.getIssuerIdentifier();
+	}
+
+	public CredentialIdentifier getCredentialIdentifier() {
+		return credentialIdentifier;
+	}
+
+	public IssuerIdentifier getVerifierIdentifier() {
+		return verifierIdentifier;
+	}
+
 	/**
 	 * Get the credential description. If necessary it is loaded from the DescriptionStore.
 	 * @return the issuer description.
@@ -205,7 +224,7 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 	public CredentialDescription getCredentialDescription() {
 		if(credentialDescription == null) {
 			try {
-				credentialDescription = DescriptionStore.getInstance().getCredentialDescriptionByName(issuerID, credentialID);
+				credentialDescription = DescriptionStore.getInstance().getCredentialDescription(credentialIdentifier);
 			} catch (InfoException e) {
 				// FIXME: for now ignore errors due to missing DescriptionStore
 				e.printStackTrace();
@@ -225,7 +244,7 @@ public class VerificationDescription extends ConfigurationParser implements Seri
 	public IssuerDescription getIssuerDescription() {
 		if(issuerDescription == null) {
 			try {
-				issuerDescription = DescriptionStore.getInstance().getIssuerDescription(issuerID);
+				issuerDescription = DescriptionStore.getInstance().getIssuerDescription(getIssuerIdentifier());
 			} catch (InfoException e) {
 				// FIXME: for now ignore errors due to missing DescriptionStore
 				e.printStackTrace();

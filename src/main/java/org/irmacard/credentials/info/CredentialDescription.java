@@ -49,6 +49,7 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 	private String shortName;
 	private String issuerID;
 	private String credentialID;
+	private String schemeManager;
 	private short id;
 	private CredentialIdentifier identifier;
 
@@ -88,8 +89,9 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 		issuerID = getFirstTagText(d, "IssuerID");
 		credentialID = getFirstTagText(d, "CredentialID");
 		id = (short) Integer.parseInt(getFirstTagText(d, "Id"));
+		schemeManager = getFirstTagText(d, "SchemeManager");
 
-		identifier = new CredentialIdentifier(new IssuerIdentifier(issuerID), credentialID);
+		identifier = new CredentialIdentifier(new IssuerIdentifier(schemeManager, issuerID), credentialID);
 
 		NodeList attrList = ((Element) d.getElementsByTagName("Attributes")
 				.item(0)).getElementsByTagName("Attribute");

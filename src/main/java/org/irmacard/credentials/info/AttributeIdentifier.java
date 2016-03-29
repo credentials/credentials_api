@@ -40,49 +40,59 @@ package org.irmacard.credentials.info;
 public class AttributeIdentifier extends ObjectIdentifier {
 	private static final long serialVersionUID = 1158661160715464298L;
 
+	private transient IssuerIdentifier issuer;
 	private transient CredentialIdentifier credential;
 
 	public AttributeIdentifier(String value) throws IllegalArgumentException {
 		super(value);
 	}
 
+	public AttributeIdentifier(CredentialIdentifier credential, String name) {
+		super(credential + "." + name);
+	}
+
 	@Override
 	protected int minSize() {
-		return 2;
+		return 3;
 	}
 
 	@Override
 	protected int maxSize() {
-		return 3;
+		return 4;
 	}
 
 	public IssuerIdentifier getIssuerIdentifier() {
-		return getCredentialIdentifier().getIssuerIdentifier();
+		if (issuer == null)
+			issuer = new IssuerIdentifier(getSchemeManagerName(), getIssuerName());
+		return issuer;
+	}
+
+	public String getSchemeManagerName() {
+		return split()[0];
 	}
 
 	public String getIssuerName() {
-		return split()[0];
+		return split()[1];
 	}
 
 	public CredentialIdentifier getCredentialIdentifier() {
 		if (credential == null)
-			credential = new CredentialIdentifier(new IssuerIdentifier(getIssuerName()), getCredentialName());
-
+			credential = new CredentialIdentifier(getIssuerIdentifier(), getCredentialName());
 		return credential;
 	}
 
 	public String getCredentialName() {
-		return split()[1];
+		return split()[2];
 	}
 
 	public String getAttributeName() {
 		if (!isCredential())
-			return split()[2];
+			return split()[3];
 
 		return null;
 	}
 
 	public boolean isCredential() {
-		return split().length == 2;
+		return split().length == 3;
 	}
 }

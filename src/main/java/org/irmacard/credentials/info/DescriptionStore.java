@@ -128,16 +128,23 @@ public class DescriptionStore {
 		return credentialDescriptions.get(new CredentialIdentifier(identifier));
 	}
 
-	/** Use {@link #getCredentialDescription(CredentialIdentifier)} instead */
-	@Deprecated
-	public CredentialDescription getCredentialDescriptionByName(String issuer, String credID) {
-		return getCredentialDescription(new CredentialIdentifier(new IssuerIdentifier(issuer), credID));
+	public CredentialDescription getCredentialDescriptionByName(IssuerIdentifier issuer, String credID) {
+		return getCredentialDescription(new CredentialIdentifier(issuer, credID));
+	}
+
+	public CredentialDescription getCredentialDescriptionByName(String schemeManager, String issuer, String credID) {
+		return getCredentialDescription(new CredentialIdentifier(schemeManager, issuer, credID));
 	}
 
 	public VerificationDescription getVerificationDescriptionByName(
-			String verifier, String verificationID) {
+			String schemeManager, String verifier, String verificationID) {
+		return getVerificationDescriptionByName(new IssuerIdentifier(schemeManager, verifier), verificationID);
+	}
+
+	public VerificationDescription getVerificationDescriptionByName(
+			IssuerIdentifier verifier, String verificationID) {
 		for (VerificationDescription vd : verificationDescriptions.values()) {
-			if (vd.getVerifierID().equals(verifier)
+			if (vd.getVerifierIdentifier().equals(verifier)
 					&& vd.getVerificationID().equals(verificationID)) {
 				return vd;
 			}
@@ -207,10 +214,10 @@ public class DescriptionStore {
 		return issuerDescriptions.values();
 	}
 
-	public Collection<VerificationDescription> getVerificationDescriptionsForVerifier(String verifierID) {
+	public Collection<VerificationDescription> getVerificationDescriptionsForVerifier(IssuerIdentifier issuer) {
 		ArrayList<VerificationDescription> result = new ArrayList<>();
 		for (VerificationDescription vd : verificationDescriptions.values()) {
-			if (vd.getVerifierID().equals(verifierID)) {
+			if (vd.getIssuerIdentifier().equals(issuer)) {
 				result.add(vd);
 			}
 		}
@@ -218,13 +225,7 @@ public class DescriptionStore {
 	}
 	
 	public Collection<VerificationDescription> getVerificationDescriptionsForVerifier(IssuerDescription verifier) {
-		ArrayList<VerificationDescription> result = new ArrayList<>();
-		for (VerificationDescription vd : verificationDescriptions.values()) {
-			if (vd.getVerifierID().equals(verifier.getID())) {
-				result.add(vd);
-			}
-		}
-		return result;
+		return getVerificationDescriptionsForVerifier(verifier.getIdentifier());
 	}
 
 	public SchemeManager getSchemeManager(String name) {

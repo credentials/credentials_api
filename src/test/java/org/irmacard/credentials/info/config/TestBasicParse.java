@@ -40,12 +40,14 @@ import org.junit.Test;
 
 
 public class TestBasicParse {
+	static public final String schemeManager = "irma-demo";
+
 	URI core = new File(System.getProperty("user.dir")).toURI().resolve(
 			"irma_configuration/");
 	URI spec = core.resolve(
-			"Surfnet/Issues/root/description.xml");
+			"irma-demo/Surfnet/Issues/root/description.xml");
 	URI vspec = core.resolve(
-			"RU/Verifies/rootID/description.xml");
+			"irma-demo/RU/Verifies/rootID/description.xml");
 	
 	@Test
 	public void parseConfig () throws InfoException {
@@ -67,7 +69,7 @@ public class TestBasicParse {
 	@Test
 	public void retrieveCredentialInfo() throws InfoException {
 		CredentialDescription cd = DescriptionStore.getInstance()
-				.getCredentialDescription(new CredentialIdentifier("MijnOverheid.ageLower"));
+				.getCredentialDescriptionByName(schemeManager, "MijnOverheid", "ageLower");
 		if(cd == null) {
 			fail("Credential description not found");
 		}
@@ -81,8 +83,8 @@ public class TestBasicParse {
 	public void retrieveCredentialDescription() throws InfoException {
 		System.out.println("Retrieve credential test");
 		CredentialDescription cd = DescriptionStore.getInstance()
-				.getCredentialDescription(new CredentialIdentifier("MijnOverheid.ageLower"));
-		System.out.println(DescriptionStore.getInstance().getIssuerDescription(new IssuerIdentifier("RU")));
+				.getCredentialDescriptionByName(schemeManager, "MijnOverheid", "ageLower");
+		System.out.println(DescriptionStore.getInstance().getIssuerDescription(new IssuerIdentifier("irma-demo", "RU")));
 		System.out.println(cd.getIssuerDescription());
 	}
 

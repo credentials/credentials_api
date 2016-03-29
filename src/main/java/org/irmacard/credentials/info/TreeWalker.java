@@ -44,21 +44,31 @@ public class TreeWalker {
 	public void parseConfiguration(DescriptionStore store) throws InfoException {
 		String[] files = fileReader.list("");
 
+		for (String path : files) {
+			if (path.startsWith(".") || fileReader.isEmpty(path))
+				continue;
+			parseSchemeManager(store, path);
+		}
+	}
+
+	public void parseSchemeManager(DescriptionStore store, String manager) throws InfoException {
+		String[] files = fileReader.list(manager);
+
 		for (String issuerPath : files) {
-			if (issuerPath.startsWith(".") || fileReader.isEmpty(issuerPath))
+			if (issuerPath.startsWith("."))
 				continue;
 
-			IssuerIdentifier issuer = new IssuerIdentifier(issuerPath);
+			IssuerIdentifier issuer = new IssuerIdentifier(manager, issuerPath);
 			if (!deserializer.containsIssuerDescription(issuer))
 				continue;
 
 			// Since issuerPath contains description.xml, it is an issuer
 			store.addIssuerDescription(deserializer.loadIssuerDescription(issuer));
 
-			tryProcessVerifications(issuerPath, store);
+			tryProcessVerifications(issuer, store);
 
 			// Load any credential types it might have
-			String[] credentialTypePaths = fileReader.list(issuerPath + "/Issues");
+			String[] credentialTypePaths = fileReader.list(issuer.getPath(false) + "/Issues");
 			if (credentialTypePaths == null)
 				continue;
 
@@ -73,14 +83,14 @@ public class TreeWalker {
 		}
 	}
 
-	private void tryProcessVerifications(String issuerPath, DescriptionStore store) throws InfoException {
-		String path = issuerPath + "/Verifies";
+	private void tryProcessVerifications(IssuerIdentifier issuer, DescriptionStore store) throws InfoException {
+		String path = issuer.getPath(false) + "/Verifies";
 		String[] verifications = fileReader.list(path);
 		if (verifications == null || verifications.length == 0)
 			return;
 
 		for (String verification : verifications) {
-			if (!deserializer.containsVerificationDescription(issuerPath, verification))
+			if (!deserializer.containsVerificationDescription(issuer, verification))
 				continue;
 			InputStream stream = fileReader.retrieveFile(path + "/" + verification + "/description.xml");
 			store.addVerificationDescription(new VerificationDescription(stream));

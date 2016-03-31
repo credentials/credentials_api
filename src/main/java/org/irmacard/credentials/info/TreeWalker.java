@@ -65,8 +65,6 @@ public class TreeWalker {
 			// Since issuerPath contains description.xml, it is an issuer
 			store.addIssuerDescription(deserializer.loadIssuerDescription(issuer));
 
-			tryProcessVerifications(issuer, store);
-
 			// Load any credential types it might have
 			String[] credentialTypePaths = fileReader.list(issuer.getPath(false) + "/Issues");
 			if (credentialTypePaths == null)
@@ -80,20 +78,6 @@ public class TreeWalker {
 					continue;
 				store.addCredentialDescription(deserializer.loadCredentialDescription(identifier));
 			}
-		}
-	}
-
-	private void tryProcessVerifications(IssuerIdentifier issuer, DescriptionStore store) throws InfoException {
-		String path = issuer.getPath(false) + "/Verifies";
-		String[] verifications = fileReader.list(path);
-		if (verifications == null || verifications.length == 0)
-			return;
-
-		for (String verification : verifications) {
-			if (!deserializer.containsVerificationDescription(issuer, verification))
-				continue;
-			InputStream stream = fileReader.retrieveFile(path + "/" + verification + "/description.xml");
-			store.addVerificationDescription(new VerificationDescription(stream));
 		}
 	}
 }

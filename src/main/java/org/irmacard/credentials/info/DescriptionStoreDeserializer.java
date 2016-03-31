@@ -60,10 +60,6 @@ public class DescriptionStoreDeserializer {
 		return new IssuerDescription(reader.retrieveFile(identifier.getPath(true)));
 	}
 
-	public boolean containsVerificationDescription(IssuerIdentifier issuer, String name) {
-		return reader.containsFile(issuer.getPath(false) + "/Verifies/" + name, "description.xml");
-	}
-
 	public FileReader getFileReader() {
 		return reader;
 	}

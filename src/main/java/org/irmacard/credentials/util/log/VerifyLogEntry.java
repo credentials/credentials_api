@@ -34,22 +34,15 @@ import java.util.Date;
 import java.util.HashMap;
 
 import org.irmacard.credentials.info.CredentialDescription;
-import org.irmacard.credentials.info.VerificationDescription;
 
 public class VerifyLogEntry extends LogEntry {
 	private static final long serialVersionUID = 1L;
-	private VerificationDescription verification;
 	private HashMap<String, Boolean> attributeDisclosed;
 
-	public VerifyLogEntry(Date timestamp, CredentialDescription credential, VerificationDescription verification, HashMap<String, Boolean> attributeDisclosed) {
+	public VerifyLogEntry(Date timestamp, CredentialDescription credential, HashMap<String, Boolean> attributeDisclosed) {
 		super(timestamp, credential);
 
-		this.verification = verification;
 		this.attributeDisclosed = attributeDisclosed;
-	}
-
-	public VerificationDescription getVerificationDescription() {
-		return verification;
 	}
 
 	public HashMap<String, Boolean> getAttributesDisclosed() {

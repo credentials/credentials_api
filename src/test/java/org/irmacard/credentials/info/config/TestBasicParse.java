@@ -46,8 +46,6 @@ public class TestBasicParse {
 			"irma_configuration/");
 	URI spec = core.resolve(
 			"irma-demo/Surfnet/Issues/root/description.xml");
-	URI vspec = core.resolve(
-			"irma-demo/RU/Verifies/rootID/description.xml");
 	
 	@Test
 	public void parseConfig () throws InfoException {
@@ -55,12 +53,6 @@ public class TestBasicParse {
 		System.out.println(cd);
 	}
 
-	@Test
-	public void parseVerifierConfig() throws InfoException {
-		VerificationDescription vd = new VerificationDescription(vspec);
-		System.out.println(vd);
-	}
-	
 	@Test
 	public void initializeDescriptionStore() throws InfoException {
 		DescriptionStore.initialize(new DescriptionStoreDeserializer(core));

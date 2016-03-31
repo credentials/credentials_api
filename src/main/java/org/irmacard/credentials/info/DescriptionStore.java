@@ -53,7 +53,6 @@ public class DescriptionStore {
 	private HashMap<String,SchemeManager> schemeManagers = new HashMap<>();
 	private HashMap<CredentialIdentifier,CredentialDescription> credentialDescriptions = new HashMap<>();
 	private HashMap<IssuerIdentifier,IssuerDescription> issuerDescriptions = new HashMap<>();
-	private HashMap<Short,VerificationDescription> verificationDescriptions = new HashMap<>();
 
 	public static void setDeserializer(DescriptionStoreDeserializer deserializer) {
 		DescriptionStore.deserializer = deserializer;
@@ -136,24 +135,6 @@ public class DescriptionStore {
 		return getCredentialDescription(new CredentialIdentifier(schemeManager, issuer, credID));
 	}
 
-	public VerificationDescription getVerificationDescriptionByName(
-			String schemeManager, String verifier, String verificationID) {
-		return getVerificationDescriptionByName(new IssuerIdentifier(schemeManager, verifier), verificationID);
-	}
-
-	public VerificationDescription getVerificationDescriptionByName(
-			IssuerIdentifier verifier, String verificationID) {
-		for (VerificationDescription vd : verificationDescriptions.values()) {
-			if (vd.getVerifierIdentifier().equals(verifier)
-					&& vd.getVerificationID().equals(verificationID)) {
-				return vd;
-			}
-		}
-
-		// TODO: error handling? Exception?
-		return null;
-	}
-
 	public void addCredentialDescription(CredentialDescription cd) throws InfoException {
 		if (credentialDescriptions.containsKey(cd.getIdentifier())) {
 			throw new InfoException("Cannot add credential " + cd.getIdentifier() + ", already exists");
@@ -186,46 +167,8 @@ public class DescriptionStore {
 		issuerDescriptions.put(id.getIdentifier(), id);
 	}
 
-	public void addVerificationDescription(VerificationDescription vd)
-			throws InfoException {
-		short id = vd.getID();
-		if (verificationDescriptions.containsKey(id)) {
-			VerificationDescription other = verificationDescriptions.get(id);
-			throw new InfoException("Cannot add verification "
-					+ vd.getVerificationID() + " of "
-					+ vd.getVerifierID() + ". Verification "
-					+ other.getVerificationID() + " of "
-					+ other.getVerifierID() + " shares the same id ("
-					+ id + ").");
-		}
-		verificationDescriptions.put(id, vd);
-	}
-
-	public void updateVerificationDescription(VerificationDescription vd)
-			throws InfoException {
-		short id = vd.getID();
-		if (verificationDescriptions.containsKey(id)) {
-			verificationDescriptions.remove(id);
-		}
-		verificationDescriptions.put(id, vd);
-	}
-	
 	public Collection<IssuerDescription> getIssuerDescriptions() {
 		return issuerDescriptions.values();
-	}
-
-	public Collection<VerificationDescription> getVerificationDescriptionsForVerifier(IssuerIdentifier issuer) {
-		ArrayList<VerificationDescription> result = new ArrayList<>();
-		for (VerificationDescription vd : verificationDescriptions.values()) {
-			if (vd.getIssuerIdentifier().equals(issuer)) {
-				result.add(vd);
-			}
-		}
-		return result;
-	}
-	
-	public Collection<VerificationDescription> getVerificationDescriptionsForVerifier(IssuerDescription verifier) {
-		return getVerificationDescriptionsForVerifier(verifier.getIdentifier());
 	}
 
 	public SchemeManager getSchemeManager(String name) {

@@ -30,6 +30,7 @@
 
 package org.irmacard.credentials.info;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -38,7 +39,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -53,6 +56,8 @@ public class DescriptionStore {
 	private HashMap<String,SchemeManager> schemeManagers = new HashMap<>();
 	private HashMap<CredentialIdentifier,CredentialDescription> credentialDescriptions = new HashMap<>();
 	private HashMap<IssuerIdentifier,IssuerDescription> issuerDescriptions = new HashMap<>();
+
+	private transient HashMap<String, CredentialIdentifier> reverseHashes = new HashMap<>();
 
 	public static void setDeserializer(DescriptionStoreDeserializer deserializer) {
 		DescriptionStore.deserializer = deserializer;
@@ -84,10 +89,29 @@ public class DescriptionStore {
 		ds = new DescriptionStore();
 		if (deserializer != null)
 			new TreeWalker(deserializer).parseConfiguration(ds);
+		ds.calculateReverseHashes();
 	}
 
 	public static boolean isInitialized() {
 		return ds != null;
+	}
+
+	MessageDigest md;
+	private void calculateReverseHashes() {
+		try {
+			md = MessageDigest.getInstance("SHA-256");
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+
+		for (CredentialIdentifier cred : ds.credentialDescriptions.keySet())
+			calculateReverseHash(cred);
+	}
+
+	private void calculateReverseHash(CredentialIdentifier cred) {
+		md.update(cred.toString().getBytes());
+		String key = new String(Base64.encodeBase64(Arrays.copyOfRange(md.digest(), 0, 16)));
+		reverseHashes.put(key, cred);
 	}
 
 	/**
@@ -199,6 +223,8 @@ public class DescriptionStore {
 		CredentialDescription cd = new CredentialDescription(cdXml);
 		addCredentialDescription(cd);
 
+		calculateReverseHash(identifier);
+
 		if (serializer != null)
 			serializer.saveCredentialDescription(cd, cdXml);
 
@@ -249,5 +275,9 @@ public class DescriptionStore {
 		br.close();
 		is.close();
 		return sb.toString();
+	}
+
+	public CredentialIdentifier hashToCredentialIdentifier(byte[] hash) {
+		return reverseHashes.get(new String(Base64.encodeBase64(hash)));
 	}
 }

@@ -28,15 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.irmacard.credentials.info;
+package org.irmacard.credentials;
 
-import java.io.InputStream;
+import java.util.Date;
 
-@SuppressWarnings("unused")
-public interface FileReader {
-	InputStream retrieveFile(String path) throws InfoException;
-	String[] list(String path);
-	boolean isEmpty(String path);
-	boolean containsFile(String path);
-	boolean containsFile(String path, String filename);
+public interface PublicKey {
+	int getCounter();
+	boolean isValidOn(Date date);
 }

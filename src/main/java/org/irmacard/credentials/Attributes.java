@@ -30,10 +30,7 @@
 
 package org.irmacard.credentials;
 
-import org.irmacard.credentials.info.CredentialDescription;
-import org.irmacard.credentials.info.CredentialIdentifier;
-import org.irmacard.credentials.info.DescriptionStore;
-import org.irmacard.credentials.info.InfoException;
+import org.irmacard.credentials.info.*;
 
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -43,11 +40,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
- * A generic container class for attributes. Possibly this will just manage
- * attribute id and value pairs. The metadata field however, is handled
- * differently. Pre 0.8 version cards hold only the expiry date in this
- * slot, since 0.8 this has been changed to hold multiple fields.
+ * A generic container class for attributes. Indexes attributes (in the form
+ * of byte arrays) by name, and provides getters and setters for all metadata
+ * fields.
  */
+@SuppressWarnings("unused")
 public class Attributes implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -75,7 +72,7 @@ public class Attributes implements Serializable {
 		private int length;
 		private int offset;
 
-		private Field(int length) {
+		Field(int length) {
 			this.length = length;
 		}
 	}
@@ -85,7 +82,7 @@ public class Attributes implements Serializable {
 		int offset = 0;
 
 		fields[0].offset = 0;
-		for (int i = 1; i < FIELD_COUNT; ++i) {;
+		for (int i = 1; i < FIELD_COUNT; ++i) {
 			offset += fields[i-1].length;
 			fields[i].offset = offset;
 		}
@@ -94,8 +91,11 @@ public class Attributes implements Serializable {
 		META_DATA_LENGTH = lastField.offset + lastField.length;
 	}
 
+	/**
+	 * Create a new instance with all metadata fields set to their default values.
+	 */
 	public Attributes() {
-		attributes = new HashMap<String, byte[]>();
+		attributes = new HashMap<>();
 
 		// Create meta-data field
 		byte[] metadata = new byte[META_DATA_LENGTH];
@@ -105,14 +105,22 @@ public class Attributes implements Serializable {
 		setMetadataField(new byte[]{CURRENT_VERSION}, Field.VERSION);
 		setSigningDate(null);
 		setValidityDuration((short)(52 / 2));
-		setKeyCounter(1);
+		setKeyCounter(0);
 	}
 
+	/**
+	 * Create a new instance with the specified attributes. The credential type is extracted from the
+	 * metadata attribute (no. 1), which must be present. The corresponding attribute names are fetched
+	 * from the {@link DescriptionStore}. If an attribute is not present in the hash map, its value
+	 * becoms 0.
+	 * @param values The attribute values
+	 * @throws IllegalArgumentException If the metadata attribute was absent, i.e., values.get(1) == null
+	 */
 	public Attributes(HashMap<Integer, BigInteger> values) throws IllegalArgumentException {
 		if (values.get(1) == null)
 			throw new IllegalArgumentException("Metadata attribute was absent but is compulsory");
 
-		attributes = new HashMap<String, byte[]>();
+		attributes = new HashMap<>();
 		attributes.put(META_DATA_FIELD, values.get(1).toByteArray());
 
 		List<String> attributeNames = getCredentialDescription().getAttributeNames();
@@ -123,8 +131,15 @@ public class Attributes implements Serializable {
 		}
 	}
 
+	/**
+	 * Create a new instance with the specified attributes. The credential type is extracted from the
+	 * metadata attribute (no. 1). The corresponding attribute names are fetched from the
+	 * {@link DescriptionStore}.
+	 * @param values The attribute values, with the metadata attribute at position 1 and the rest of
+	 *               the attributes at position 2 and on.
+	 */
 	public Attributes(List<BigInteger> values) {
-		attributes = new HashMap<String, byte[]>();
+		attributes = new HashMap<>();
 		attributes.put(META_DATA_FIELD, values.get(1).toByteArray());
 
 		List<String> attributeNames = getCredentialDescription().getAttributeNames();
@@ -151,17 +166,6 @@ public class Attributes implements Serializable {
 			buffer.put(new byte[emptySpace]);
 		buffer.put(value);
 		add(META_DATA_FIELD, buffer.array());
-
-//		// Zero the fields first
-//		for (int i = 0; i < length; ++i)
-//			metadata[offset + i] = (byte) 0x0;
-//
-//		// Populate the bytes, pushing them as far right as possible within the space allotted to this field
-//		int idx;
-//		for (int i = 0; i < value.length; i++) {
-//			idx = offset + (length - value.length) + i;
-//			metadata[idx] = value[i];
-//		}
 	}
 
 	public void add(String id, byte[] value) {
@@ -191,14 +195,23 @@ public class Attributes implements Serializable {
 		return res;
 	}
 
+	/**
+	 * Get the validity duration in weeks for this credential.
+	 */
 	public short getValidityDuration() {
 		return ByteBuffer.wrap(getMetadataField(Field.EXPIRY)).getShort();
 	}
 
+	/**
+	 * Set the validity duration in weeks for this credential.
+	 */
 	public void setValidityDuration(short numberOfWeeks) {
 		setMetadataField(ByteBuffer.allocate(2).putShort(numberOfWeeks).array(), Field.EXPIRY);
 	}
 
+	/**
+	 * Get the expiry date for this credential.
+	 */
 	public Date getExpiryDate() {
 		Date signing = getSigningDate();
 		long duration = getValidityDuration() * EXPIRY_FACTOR;
@@ -206,6 +219,11 @@ public class Attributes implements Serializable {
 		return new Date(signing.getTime() + duration);
 	}
 
+	/**
+	 * Set the expiry date for this credential.
+	 * @param expiry The desired expiry date
+	 * @throws IllegalArgumentException if the specified date does not fall on an epoch boundary
+	 */
 	public void setExpiryDate(Date expiry) throws IllegalArgumentException {
 		long expiryLong = expiry.getTime();
 		if (expiryLong % EXPIRY_FACTOR != 0)
@@ -217,6 +235,9 @@ public class Attributes implements Serializable {
 		setMetadataField(ByteBuffer.allocate(2).putShort(difference).array(), Field.EXPIRY);
 	}
 
+	/**
+	 * Get the date on which this credential was signed.
+	 */
 	public Date getSigningDate() {
 		byte[] signingDateBytes = getMetadataField(Field.SIGNING_DATE);
 		long signingDateLong = new BigInteger(signingDateBytes).longValue();
@@ -226,6 +247,9 @@ public class Attributes implements Serializable {
 		return signingDate.getTime();
 	}
 
+	/**
+	 * Set the date on which this credential was signed.
+	 */
 	public void setSigningDate(Date date) {
 		long value;
 		if (date != null)
@@ -234,16 +258,18 @@ public class Attributes implements Serializable {
 			value = Calendar.getInstance().getTimeInMillis() / EXPIRY_FACTOR;
 
 		setMetadataField(BigInteger.valueOf(value).toByteArray(), Field.SIGNING_DATE);
-
-//		byte[] bytes = new byte[3];
-//		ByteBuffer.allocate(8).putLong(value).get(bytes, 5, 3);
-//		setMetadataField(bytes, Field.SIGNING_DATE);
 	}
 
+	/**
+	 * Get the counter of the public key with which this credential was signed.
+	 */
 	public short getKeyCounter() {
 		return ByteBuffer.wrap(getMetadataField(Field.KEY_COUNTER)).getShort();
 	}
 
+	/**
+	 * Set the counter of the public key with which this credential was signed.
+	 */
 	public void setKeyCounter(int value) {
 		setMetadataField(ByteBuffer.allocate(2).putShort((short)value).array(), Field.KEY_COUNTER);
 	}
@@ -261,6 +287,9 @@ public class Attributes implements Serializable {
 		}
 	}
 
+	/**
+	 * Set the {@link CredentialIdentifier} of this credential.
+	 */
 	public void setCredentialIdentifier(CredentialIdentifier value) {
 		try {
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -272,6 +301,10 @@ public class Attributes implements Serializable {
 		}
 	}
 
+	/**
+	 * Get the {@link CredentialDescription} of this credential, using {@link #getCredentialIdentifier()}
+	 * and the {@link DescriptionStore}.
+	 */
 	public CredentialDescription getCredentialDescription() {
 		CredentialIdentifier identifier = getCredentialIdentifier();
 		try {
@@ -282,22 +315,46 @@ public class Attributes implements Serializable {
 	}
 
 	/**
-	 * Test whether the the credential containing these attributes is still valid
-	 * on the given date.
-	 * @return validity
+	 * Test whether the the credential containing these attributes is still valid on the given date.
+	 * @return True if the specified date is before the expiry dates of both the credential and the
+	 *         corresponding public key; false otherwise.
+	 * @throws InfoException when the {@link CredentialIdentifier} could not be determined using the metadata attribute;
+	 *                       when the {@link KeyStore} has not been initialized; or when it does not contain the
+	 *                       required public key.
 	 */
-	public boolean isValidOn(Date date) {
-		return date.before(getExpiryDate());
+	public boolean isValidOn(Date date) throws InfoException {
+		try {
+			IssuerIdentifier issuer = getCredentialIdentifier().getIssuerIdentifier();
+			PublicKey key = KeyStore.getInstance().getPublicKey(issuer, getKeyCounter());
+			return key.isValidOn(getSigningDate()) && !isExpiredOn(date);
+		} catch (NullPointerException e) {
+			throw new InfoException("Public key not found in store", e);
+		}
 	}
 
 	/**
-	 * Test whether the credential containing these attributes is currently still valid.
-	 * @return validity
+	 * @return {@link #isValidOn(Date)} the current time.
 	 */
-	public boolean isValid() {
+	public boolean isValid() throws InfoException {
 		return isValidOn(Calendar.getInstance().getTime());
 	}
 
+	/** Returns true iff the credential is expired on the given date. */
+	public boolean isExpiredOn(Date date) {
+		return date.after(getExpiryDate());
+	}
+
+	/** Returns true iff the credential is expired at the current time. */
+	public boolean isExpired() {
+		return isExpiredOn(Calendar.getInstance().getTime());
+	}
+
+	/**
+	 * Convert this instance to a list of BigIntegers, suitable for passing to the Idemix API.
+	 * The secret key is not included so the first element is the metadata attribute.
+	 * @throws InfoException if there is a mismatch between the attribute names according to this
+	 *                       instance and the {@link DescriptionStore}
+	 */
 	public ArrayList<BigInteger> toBigIntegers() throws InfoException {
 		List<String> names = getCredentialDescription().getAttributeNames();
 		ArrayList<BigInteger> bigints = new ArrayList<>(names.size() + 2);
@@ -306,10 +363,10 @@ public class Attributes implements Serializable {
 		bigints.add(new BigInteger(get(META_DATA_FIELD)));
 
 		// Add the other attributes
-		for (int i = 0; i < names.size(); ++i) {
-			byte[] value = get(names.get(i));
+		for (String name : names) {
+			byte[] value = get(name);
 			if (value == null)
-				throw new InfoException("Attribute " + names.get(i) + " missing");
+				throw new InfoException("Attribute " + name + " missing");
 			bigints.add(new BigInteger(value));
 		}
 

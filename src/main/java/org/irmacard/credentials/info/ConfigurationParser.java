@@ -30,17 +30,16 @@
 
 package org.irmacard.credentials.info;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 
 abstract public class ConfigurationParser {
 	// TODO: need to mark this transient to exclude it from GSON serialization

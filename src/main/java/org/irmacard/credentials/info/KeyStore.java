@@ -30,13 +30,24 @@
 
 package org.irmacard.credentials.info;
 
-import java.io.InputStream;
+import org.irmacard.credentials.PublicKey;
 
-@SuppressWarnings("unused")
-public interface FileReader {
-	InputStream retrieveFile(String path) throws InfoException;
-	String[] list(String path);
-	boolean isEmpty(String path);
-	boolean containsFile(String path);
-	boolean containsFile(String path, String filename);
+/**
+ * Abstract class for public key stores, containing {@link PublicKey}s.
+ */
+public abstract class KeyStore {
+	private static KeyStore instance;
+
+	public static KeyStore getInstance() throws InfoException {
+		if (instance == null)
+			throw new InfoException("KeyStore not inialized using KeyStore.setInstance()");
+
+		return instance;
+	}
+
+	public static void setInstance(KeyStore instance) {
+		KeyStore.instance = instance;
+	}
+
+	public abstract PublicKey getPublicKey(IssuerIdentifier issuer, int counter) throws InfoException;
 }

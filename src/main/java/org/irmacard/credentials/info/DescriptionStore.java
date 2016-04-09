@@ -207,6 +207,14 @@ public class DescriptionStore {
 		return schemeManagers.remove(name);
 	}
 
+	/**
+	 * Download a credential description, and if necessary the corresponding issuer description,
+	 * from the scheme manager.
+	 * @param identifier The credential type
+	 * @return The credential description
+	 * @throws IOException if the file could not be downloaded
+	 * @throws InfoException if the scheme manager is unknown
+	 */
 	public CredentialDescription downloadCredentialDescription(CredentialIdentifier identifier)
 	throws IOException, InfoException {
 		IssuerIdentifier issuer = identifier.getIssuerIdentifier();
@@ -231,6 +239,13 @@ public class DescriptionStore {
 		return cd;
 	}
 
+	/**
+	 * Download an issuer description from the scheme manager
+	 * @param issuer The issuer
+	 * @return The issuer deescription
+	 * @throws IOException if the files could not be downloaed
+	 * @throws InfoException if the scheme manager was unknown
+	 */
 	public IssuerDescription downloadIssuerDescription(IssuerIdentifier issuer) throws IOException, InfoException {
 		SchemeManager manager = schemeManagers.get(issuer.getSchemeManagerName());
 		if (manager == null)
@@ -248,6 +263,12 @@ public class DescriptionStore {
 		return id;
 	}
 
+	/**
+	 * Do a HTTP request to the server
+	 * @param url The url to connect to
+	 * @return An inputstream containing the server's response
+	 * @throws IOException if the status is not 200
+	 */
 	public static InputStream doHttpRequest(String url) throws IOException {
 		HttpResponse response = httpClient.execute(new HttpGet(url));
 		int status = response.getStatusLine().getStatusCode();

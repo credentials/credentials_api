@@ -52,10 +52,12 @@ public class TreeWalker {
 	}
 
 	public void parseSchemeManager(DescriptionStore store, String manager) throws InfoException {
+		store.addSchemeManager(deserializer.loadSchemeManager(manager));
+
 		String[] files = fileReader.list(manager);
 
 		for (String issuerPath : files) {
-			if (issuerPath.startsWith("."))
+			if (issuerPath.startsWith(".") || issuerPath.equals("description.xml"))
 				continue;
 
 			IssuerIdentifier issuer = new IssuerIdentifier(manager, issuerPath);

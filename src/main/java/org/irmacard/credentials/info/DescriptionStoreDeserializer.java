@@ -60,6 +60,10 @@ public class DescriptionStoreDeserializer {
 		return new IssuerDescription(reader.retrieveFile(identifier.getPath(true)));
 	}
 
+	public SchemeManager loadSchemeManager(String name) throws InfoException {
+		return new SchemeManager(reader.retrieveFile(name + "/description.xml"));
+	}
+
 	public FileReader getFileReader() {
 		return reader;
 	}

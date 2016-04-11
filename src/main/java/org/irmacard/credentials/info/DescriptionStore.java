@@ -225,7 +225,8 @@ public class DescriptionStore {
 		SchemeManager manager = schemeManagers.get(issuer.getSchemeManagerName());
 		if (manager == null)
 			throw new InfoException("Unknown scheme manager");
-		String url = manager.getUrl() + identifier.getPath(true);
+		String url = manager.getUrl() + "/" + issuer.getIssuerName() +
+				"/Issues/" + identifier.getCredentialName() + "/description.xml";
 
 		String cdXml = inputStreamToString(doHttpRequest(url));
 		CredentialDescription cd = new CredentialDescription(cdXml);
@@ -250,7 +251,7 @@ public class DescriptionStore {
 		SchemeManager manager = schemeManagers.get(issuer.getSchemeManagerName());
 		if (manager == null)
 			throw new InfoException("Unknown scheme manager");
-		String url = manager.getUrl() + issuer.getPath(false);
+		String url = manager.getUrl() + "/" + issuer.getIssuerName();
 
 		String issuerXml = inputStreamToString(doHttpRequest(url + "/description.xml"));
 		IssuerDescription id = new IssuerDescription(issuerXml);
@@ -261,6 +262,18 @@ public class DescriptionStore {
 			serializer.saveIssuerDescription(id, issuerXml, logo);
 
 		return id;
+	}
+
+	public SchemeManager downloadSchemeManager(String url) throws IOException, InfoException {
+		SchemeManager manager = new SchemeManager(DescriptionStore.doHttpRequest(url));
+
+		// FIXME For easier debugger. Remove
+		manager.setUrl(url);
+
+		if (serializer != null)
+			serializer.saveSchemeManager(manager);
+
+		return manager;
 	}
 
 	/**

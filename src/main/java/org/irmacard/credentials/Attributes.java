@@ -147,6 +147,14 @@ public class Attributes implements Serializable {
 			attributes.put(attributeNames.get(i), values.get(i+2).toByteArray());
 	}
 
+	/**
+	 * Create a new instance containing the specified BigInteger as metadat attribute.
+	 */
+	public Attributes(BigInteger metadata) {
+		attributes = new HashMap<>();
+		attributes.put(META_DATA_FIELD, metadata.toByteArray());
+	}
+
 	public byte[] getMetadataField(Field field) {
 		return Arrays.copyOfRange(attributes.get(META_DATA_FIELD), field.offset, field.offset + field.length);
 	}

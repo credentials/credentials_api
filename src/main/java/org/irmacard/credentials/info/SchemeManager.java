@@ -30,13 +30,34 @@
 
 package org.irmacard.credentials.info;
 
-public class SchemeManager {
+import org.w3c.dom.Document;
+
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.*;
+
+public class SchemeManager extends ConfigurationParser implements Serializable {
+	private static final long serialVersionUID = -6892307557305396448L;
+
+	private transient Document d;
 	private String name;
 	private String url;
 
-	public SchemeManager(String name, String url) {
-		this.name = name;
-		this.url = url;
+	public SchemeManager(InputStream stream) throws InfoException {
+		super();
+		Document d = parse(stream);
+		init(d);
+	}
+
+	public SchemeManager(String xml) throws InfoException {
+		this(new ByteArrayInputStream(xml.getBytes()));
+	}
+
+	private void init(Document d) throws InfoException {
+		this.d = d;
+		name = getFirstTagText(d, "Id");
+		url = getFirstTagText(d, "Url");
 	}
 
 	public String getName() {
@@ -45,5 +66,27 @@ public class SchemeManager {
 
 	public String getUrl() {
 		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getXml() {
+		try {
+			Transformer trans = TransformerFactory.newInstance().newTransformer();
+			trans.setOutputProperty(OutputKeys.METHOD, "xml");
+			trans.setOutputProperty(OutputKeys.INDENT, "yes");
+			trans.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", Integer.toString(4));
+
+			StringWriter sw = new StringWriter();
+			StreamResult result = new StreamResult(sw);
+			DOMSource source = new DOMSource(d.getDocumentElement());
+
+			trans.transform(source, result);
+			return sw.toString();
+		} catch (TransformerException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

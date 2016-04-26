@@ -42,9 +42,8 @@ import java.io.InputStream;
 import java.net.URI;
 
 abstract public class ConfigurationParser {
-	// TODO: need to mark this transient to exclude it from GSON serialization
-	// which is annoying.
-	protected transient DocumentBuilder db;
+	private transient DocumentBuilder db;
+	private transient int schemaVersion = 1;
 
 	public ConfigurationParser() {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -88,7 +87,10 @@ abstract public class ConfigurationParser {
 	}
 
 	private Document internalParse(InputStream inputStream) throws SAXException, IOException {
-		return db.parse(inputStream);
+		Document d = db.parse(inputStream);
+		String versionAttribute = d.getDocumentElement().getAttribute("version");
+		schemaVersion = versionAttribute.length()>0 ? Integer.parseInt(versionAttribute) : 1;
+		return d;
 	}
 
 	protected String getFirstTagText(Document d, String tag) throws InfoException {
@@ -97,5 +99,9 @@ abstract public class ConfigurationParser {
 			throw new InfoException("Expected tag <" + tag + "> is missing.");
 		}
 		return all.item(0).getTextContent().trim();
+	}
+
+	protected int getSchemaVersion() {
+		return schemaVersion;
 	}
 }

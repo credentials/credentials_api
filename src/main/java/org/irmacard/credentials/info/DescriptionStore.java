@@ -33,6 +33,7 @@ package org.irmacard.credentials.info;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 
 import java.io.BufferedReader;
@@ -41,12 +42,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.*;
 
 @SuppressWarnings("unused")
 public class DescriptionStore {
+	public static final int httpTimeout = 5000; // milliseconds
+
 	private static DescriptionStoreDeserializer deserializer;
 	private static DescriptionStoreSerializer serializer;
 	private static HttpClient httpClient;
@@ -199,12 +200,41 @@ public class DescriptionStore {
 		return schemeManagers.get(name);
 	}
 
-	public void addSchemeManager(SchemeManager manager) {
+	public boolean containsSchemeManager(String url) {
+		for (SchemeManager manager : schemeManagers.values())
+			if (manager.getUrl().equals(url))
+				return true;
+
+		return false;
+	}
+
+	/**
+	 * Add a new scheme manager.
+	 * @throws InfoException if the manager already exists
+	 */
+	public void addSchemeManager(SchemeManager manager) throws InfoException {
+		if (schemeManagers.containsKey(manager.getName()))
+			throw new InfoException("Scheme manager with id " + manager.getName() + " already exists");
+
 		schemeManagers.put(manager.getName(), manager);
 	}
 
 	public SchemeManager removeSchemeManager(String name) {
 		return schemeManagers.remove(name);
+	}
+
+	/**
+	 * Get all scheme managers, sorted alphabetically by their name.
+	 */
+	public ArrayList<SchemeManager> getSchemeManagers() {
+		ArrayList<String> names = new ArrayList<>(schemeManagers.keySet());
+		Collections.sort(names);
+
+		ArrayList<SchemeManager> managers = new ArrayList<>(names.size());
+		for (String name : names)
+			managers.add(getSchemeManager(name));
+
+		return managers;
 	}
 
 	/**
@@ -265,7 +295,14 @@ public class DescriptionStore {
 	}
 
 	public SchemeManager downloadSchemeManager(String url) throws IOException, InfoException {
-		SchemeManager manager = new SchemeManager(DescriptionStore.doHttpRequest(url));
+		// The base url for any manager is always the bare url, without trailing slash or description.xml or both
+		if (url.endsWith("/"))
+			url = url.substring(0, url.length() - 1);
+		if (url.endsWith("/description.xml"))
+			url = url.substring(0, url.length() - "/description.xml".length());
+
+		SchemeManager manager = new SchemeManager(DescriptionStore.doHttpRequest(url + "/description.xml"));
+		addSchemeManager(manager);
 
 		// FIXME For easier debugger. Remove
 		manager.setUrl(url);
@@ -283,7 +320,14 @@ public class DescriptionStore {
 	 * @throws IOException if the status is not 200
 	 */
 	public static InputStream doHttpRequest(String url) throws IOException {
-		HttpResponse response = httpClient.execute(new HttpGet(url));
+		HttpGet get = new HttpGet(url);
+		get.setConfig(RequestConfig.custom()
+				.setSocketTimeout(httpTimeout)
+				.setConnectTimeout(httpTimeout)
+				.setConnectionRequestTimeout(httpTimeout)
+				.build());
+
+		HttpResponse response = httpClient.execute(get);
 		int status = response.getStatusLine().getStatusCode();
 		if (status == 404)
 			throw new IOException("404: File not found");

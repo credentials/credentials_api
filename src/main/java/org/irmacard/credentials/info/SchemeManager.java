@@ -32,10 +32,16 @@ package org.irmacard.credentials.info;
 
 import org.w3c.dom.Document;
 
-import javax.xml.transform.*;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.io.StringWriter;
 
 public class SchemeManager extends ConfigurationParser implements Serializable {
 	private static final long serialVersionUID = -6892307557305396448L;
@@ -43,6 +49,9 @@ public class SchemeManager extends ConfigurationParser implements Serializable {
 	private transient Document d;
 	private String name;
 	private String url;
+	private String hrName;
+	private String description;
+	private String contact;
 
 	public SchemeManager(InputStream stream) throws InfoException {
 		super();
@@ -58,6 +67,16 @@ public class SchemeManager extends ConfigurationParser implements Serializable {
 		this.d = d;
 		name = getFirstTagText(d, "Id");
 		url = getFirstTagText(d, "Url");
+
+		if (getSchemaVersion() >= 3) {
+			hrName = getFirstTagText(d, "Name");
+			description = getFirstTagText(d, "Description");
+			contact = getFirstTagText(d, "Contact");
+		} else {
+			hrName = name;
+			description = "";
+			contact = "";
+		}
 	}
 
 	public String getName() {
@@ -68,8 +87,24 @@ public class SchemeManager extends ConfigurationParser implements Serializable {
 		return url;
 	}
 
+	@SuppressWarnings("unused")
+	public String getHumanReadableName() {
+		return hrName;
+	}
+
+	@SuppressWarnings("unused")
+	public String getDescription() {
+		return description;
+	}
+
+	@SuppressWarnings("unused")
+	public String getContactInfo() {
+		return contact;
+	}
+
 	public void setUrl(String url) {
 		this.url = url;
+		d.getElementsByTagName("Url").item(0).setTextContent(url);
 	}
 
 	public String getXml() {

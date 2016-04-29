@@ -33,8 +33,8 @@ package org.irmacard.credentials.info;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.params.HttpConnectionParams;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -70,6 +70,8 @@ public class DescriptionStore {
 
 	public static void setHttpClient(HttpClient client) {
 		DescriptionStore.httpClient = client;
+		HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), httpTimeout);
+		HttpConnectionParams.setSoTimeout(httpClient.getParams(), httpTimeout);
 	}
 
 	public static void initialize(DescriptionStoreDeserializer deserializer,
@@ -77,7 +79,7 @@ public class DescriptionStore {
 	                              HttpClient client) throws InfoException {
 		DescriptionStore.deserializer = deserializer;
 		DescriptionStore.serializer = serializer;
-		DescriptionStore.httpClient = client;
+		setHttpClient(client);
 		initialize();
 	}
 
@@ -219,8 +221,27 @@ public class DescriptionStore {
 		schemeManagers.put(manager.getName(), manager);
 	}
 
+	/**
+	 * Removes the specified scheme manager, as well as any IssuerDescriptions and CredentialDescriptions
+	 * associated to the specified manager.
+	 * @return the remove manager if any, null otherwise
+	 */
 	public SchemeManager removeSchemeManager(String name) {
-		return schemeManagers.remove(name);
+		SchemeManager manager = schemeManagers.remove(name);
+
+		for (Iterator<CredentialIdentifier> it = credentialDescriptions.keySet().iterator(); it.hasNext(); ) {
+			CredentialIdentifier entry = it.next();
+			if (entry.getSchemeManagerName().equals(name))
+				it.remove();
+		}
+
+		for (Iterator<IssuerIdentifier> it = issuerDescriptions.keySet().iterator(); it.hasNext(); ) {
+			IssuerIdentifier entry = it.next();
+			if (entry.getSchemeManagerName().equals(name))
+				it.remove();
+		}
+
+		return manager;
 	}
 
 	/**
@@ -295,6 +316,11 @@ public class DescriptionStore {
 	}
 
 	public SchemeManager downloadSchemeManager(String url) throws IOException, InfoException {
+		if (url.startsWith("http://"))
+			throw new IOException("Can't download scheme manager without https");
+		if (!url.startsWith("https://"))
+			url = "https://" + url;
+
 		// The base url for any manager is always the bare url, without trailing slash or description.xml or both
 		if (url.endsWith("/"))
 			url = url.substring(0, url.length() - 1);
@@ -303,9 +329,6 @@ public class DescriptionStore {
 
 		SchemeManager manager = new SchemeManager(DescriptionStore.doHttpRequest(url + "/description.xml"));
 		addSchemeManager(manager);
-
-		// FIXME For easier debugger. Remove
-		manager.setUrl(url);
 
 		if (serializer != null)
 			serializer.saveSchemeManager(manager);
@@ -320,14 +343,8 @@ public class DescriptionStore {
 	 * @throws IOException if the status is not 200
 	 */
 	public static InputStream doHttpRequest(String url) throws IOException {
-		HttpGet get = new HttpGet(url);
-		get.setConfig(RequestConfig.custom()
-				.setSocketTimeout(httpTimeout)
-				.setConnectTimeout(httpTimeout)
-				.setConnectionRequestTimeout(httpTimeout)
-				.build());
+		HttpResponse response = httpClient.execute(new HttpGet(url));
 
-		HttpResponse response = httpClient.execute(get);
 		int status = response.getStatusLine().getStatusCode();
 		if (status == 404)
 			throw new IOException("404: File not found");

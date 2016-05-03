@@ -50,4 +50,6 @@ public abstract class KeyStore {
 	}
 
 	public abstract PublicKey getPublicKey(IssuerIdentifier issuer, int counter) throws InfoException;
+
+	public abstract void removePublicKeys(IssuerIdentifier issuer);
 }

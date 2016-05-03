@@ -237,8 +237,12 @@ public class DescriptionStore {
 
 		for (Iterator<IssuerIdentifier> it = issuerDescriptions.keySet().iterator(); it.hasNext(); ) {
 			IssuerIdentifier entry = it.next();
-			if (entry.getSchemeManagerName().equals(name))
+			if (entry.getSchemeManagerName().equals(name)) {
+				try {
+					KeyStore.getInstance().removePublicKeys(entry);
+				} catch (InfoException e) { /* Ignore, nothing to do */ }
 				it.remove();
+			}
 		}
 
 		return manager;

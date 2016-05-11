@@ -30,12 +30,11 @@
 
 package org.irmacard.credentials.info;
 
+import com.google.api.client.http.*;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.params.HttpConnectionParams;
 
+import javax.net.ssl.SSLSocketFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,7 +49,9 @@ public class DescriptionStore {
 
 	private static DescriptionStoreDeserializer deserializer;
 	private static DescriptionStoreSerializer serializer;
-	private static HttpClient httpClient;
+	private static int timeout = 5000;
+	private static HttpRequestFactory requestFactory;
+	private static SSLSocketFactory socketFactory;
 
 	private static DescriptionStore ds;
 
@@ -68,24 +69,41 @@ public class DescriptionStore {
 		DescriptionStore.serializer = serializer;
 	}
 
-	public static void setHttpClient(HttpClient client) {
-		DescriptionStore.httpClient = client;
-		HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), httpTimeout);
-		HttpConnectionParams.setSoTimeout(httpClient.getParams(), httpTimeout);
+	public static void setSocketFactory(SSLSocketFactory socketFactory) {
+		DescriptionStore.socketFactory = socketFactory;
+
+		requestFactory = new NetHttpTransport.Builder()
+				.setSslSocketFactory(socketFactory)
+				.build()
+				.createRequestFactory(new HttpRequestInitializer() {
+					@Override
+					public void initialize(HttpRequest httpRequest) throws IOException {
+						httpRequest.setConnectTimeout(timeout);
+					}
+				});
 	}
 
 	public static void initialize(DescriptionStoreDeserializer deserializer,
 	                              DescriptionStoreSerializer serializer,
-	                              HttpClient client) throws InfoException {
+	                              SSLSocketFactory socketFactory) throws InfoException {
 		DescriptionStore.deserializer = deserializer;
 		DescriptionStore.serializer = serializer;
-		setHttpClient(client);
+		setSocketFactory(socketFactory);
 		initialize();
 	}
 
+	public static void initialize(DescriptionStoreDeserializer deserializer,
+	                              DescriptionStoreSerializer serializer) throws InfoException {
+		DescriptionStore.initialize(deserializer, serializer, null);
+	}
+
+	public static void initialize(DescriptionStoreDeserializer deserializer,
+	                              SSLSocketFactory socketFactory) throws InfoException {
+		DescriptionStore.initialize(deserializer, null, socketFactory);
+	}
+
 	public static void initialize(DescriptionStoreDeserializer deserializer) throws InfoException {
-		DescriptionStore.deserializer = deserializer;
-		initialize();
+		DescriptionStore.initialize(deserializer, null,  null);
 	}
 
 	public static void initialize() throws InfoException {
@@ -341,26 +359,20 @@ public class DescriptionStore {
 	}
 
 	/**
-	 * Do a HTTP request to the server
+	 * Do a HTTP request to the server.
 	 * @param url The url to connect to
 	 * @return An inputstream containing the server's response
-	 * @throws IOException if the status is not 200
+	 * @throws IOException if the status code is not in the 2XX success range
 	 */
 	public static InputStream doHttpRequest(String url) throws IOException {
-		HttpResponse response = httpClient.execute(new HttpGet(url));
-
-		int status = response.getStatusLine().getStatusCode();
-		if (status == 404)
-			throw new IOException("404: File not found");
-
-		InputStream stream = response.getEntity().getContent();
-		if (status == 200) {
-			return stream;
-		} else {
-			throw new IOException("Server returned "
-					+ status + " "
-					+ response.getStatusLine().getReasonPhrase() + ":\n"
-					+ inputStreamToString(stream));
+		HttpResponse response = null;
+		try {
+			response = requestFactory.buildGetRequest(new GenericUrl(url)).execute();
+			return response.getContent();
+		} finally {
+			try {
+				if (response != null) response.disconnect();
+			} catch (IOException e) { /* ignore */ }
 		}
 	}
 

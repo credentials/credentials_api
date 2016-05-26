@@ -2,23 +2,16 @@
 
 The Credentials API interfaces to the credential descriptions in `irma_configuration`. This is currently its main task. The classes responsible for this are contained in `org.irmacard.credentials.info`. These are also the primary entry points into this library. Furthermore, it provides some generalized functions for working with credential systems.
 
-*WARNING* This package contains some old code that should be cleaned up soon.
-
 ## Example of using the DescriptionStore
 
 TODO: Create an example of setting up the description store and show how it integrates with `irma_configuration`.
 
 ## Dependencies
 
-This library has the following dependencies.  All these dependencies will be automatically downloaded by gradle when building or installing the library (except for cert-cvc, which is included).
+This library has the following dependencies.  All these dependencies will be automatically downloaded by gradle when building or installing the library.
 
-External dependencies:
-
- * [Cert-CVC](http://www.ejbca.org/) (included)
-
-Internal dependencies:
-
- * [Scuba](https://github.com/credentials/scuba), The smartcard abstraction layer, uses `scuba_smartcard`
+ * [Apache Commons Codec](https://commons.apache.org/proper/commons-codec/)
+ * [Google HTTP client](https://developers.google.com/api-client-library/java/google-http-java-client/)
 
 For running the tests:
 

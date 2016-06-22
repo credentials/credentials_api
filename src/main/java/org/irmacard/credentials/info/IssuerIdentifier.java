@@ -76,6 +76,14 @@ public class IssuerIdentifier extends ObjectIdentifier {
 			return path;
 	}
 
+	public SchemeManager getSchemeManager() {
+		try {
+			return DescriptionStore.getInstance().getSchemeManager(getSchemeManagerName());
+		} catch (InfoException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public IssuerDescription getIssuerDescription() {
 		try {
 			return DescriptionStore.getInstance().getIssuerDescription(this);

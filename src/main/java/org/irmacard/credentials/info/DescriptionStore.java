@@ -354,14 +354,8 @@ public class DescriptionStore {
 	 */
 	public static InputStream doHttpRequest(String url) throws IOException {
 		HttpResponse response = null;
-		try {
-			response = requestFactory.buildGetRequest(new GenericUrl(url)).execute();
-			return response.getContent();
-		} finally {
-			try {
-				if (response != null) response.disconnect();
-			} catch (IOException e) { /* ignore */ }
-		}
+		response = requestFactory.buildGetRequest(new GenericUrl(url)).execute();
+		return response.getContent();
 	}
 
 	public static String inputStreamToString(InputStream is) throws IOException {

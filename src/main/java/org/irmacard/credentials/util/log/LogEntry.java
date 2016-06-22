@@ -74,7 +74,7 @@ public class LogEntry implements Serializable{
 	}
 
 	protected String baseString() {
-		return credential.getName() + "(" + credential.getId()
-				+ ") on " + (new SimpleDateFormat()).format(timestamp);
+		return credential.getIdentifier().toString()
+				+ " on " + (new SimpleDateFormat()).format(timestamp);
 	}
 }

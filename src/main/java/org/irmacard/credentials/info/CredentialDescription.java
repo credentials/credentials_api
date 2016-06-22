@@ -50,7 +50,6 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 	private String issuerID;
 	private String credentialID;
 	private String schemeManager;
-	private short id;
 	private CredentialIdentifier identifier;
 
 	private ArrayList<AttributeDescription> attributes;
@@ -88,7 +87,6 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 		shortName = getFirstTagText(d, "ShortName");
 		issuerID = getFirstTagText(d, "IssuerID");
 		credentialID = getFirstTagText(d, "CredentialID");
-		id = (short) Integer.parseInt(getFirstTagText(d, "Id"));
 		schemeManager = getFirstTagText(d, "SchemeManager");
 
 		identifier = new CredentialIdentifier(new IssuerIdentifier(schemeManager, issuerID), credentialID);
@@ -106,7 +104,7 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 	 * FIXME: Nicer string representation would be nice
 	 */
 	public String toString() {
-		return name + "(" + id + "): " + attributes;
+		return identifier.toString() + ": " + attributes;
 	}
 
 	/**
@@ -163,14 +161,6 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 	 */
 	public String getDescription() {
 		return description;
-	}
-	
-	/**
-	 * Get the internal identifier used to denote this credential
-	 * TODO: make naming consistent with other getID's
-	 */
-	public short getId() {
-		return id; 
 	}
 
 	/**

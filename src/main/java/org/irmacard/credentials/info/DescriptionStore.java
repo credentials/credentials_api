@@ -326,10 +326,10 @@ public class DescriptionStore {
 	}
 
 	public SchemeManager downloadSchemeManager(String url) throws IOException, InfoException {
-//		if (url.startsWith("http://"))
-//			throw new IOException("Can't download scheme manager without https");
-//		if (!url.startsWith("https://"))
-//			url = "https://" + url;
+		if (url.startsWith("http://"))
+			throw new IOException("Can't download scheme manager without https");
+		if (!url.startsWith("https://"))
+			url = "https://" + url;
 
 		// The base url for any manager is always the bare url, without trailing slash or description.xml or both
 		if (url.endsWith("/"))

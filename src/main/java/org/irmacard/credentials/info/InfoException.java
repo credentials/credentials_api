@@ -31,42 +31,29 @@
 package org.irmacard.credentials.info;
 
 /**
- * Because I got tired of passing around exceptions all the time
- * Probably Pim has a nice fix for this already in place somewhere,
- * but in the mean time, this'll do.
+ * Exception for store-related errors.
+ *
+ * @see StoreException
+ * @see KeyException
  *
  * @author Wouter Lueks
  *
  */
 public class InfoException extends Exception {
-	/**
-	 * Actual exception that was initially thrown.
-	 * */
-	Exception inner;
-
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 1812980213957824660L;
 
-	@Deprecated
-	public InfoException(Exception inner, String s) {
-		super(s, inner);
-		this.inner = inner;
+	public InfoException() {
 	}
 
-	public InfoException(String s, Exception inner) {
-		super(s, inner);
-		this.inner = inner;
+	public InfoException(String message) {
+		super(message);
 	}
 
-	public InfoException(String s) {
-		super(s);
-		this.inner = null;
+	public InfoException(String message, Throwable cause) {
+		super(message, cause);
 	}
 
-	@Deprecated
-	public Exception getInner() {
-		return inner;
+	public InfoException(Throwable cause) {
+		super(cause);
 	}
 }

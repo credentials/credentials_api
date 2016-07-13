@@ -38,9 +38,9 @@ import org.irmacard.credentials.PublicKey;
 public abstract class KeyStore {
 	private static KeyStore instance;
 
-	public static KeyStore getInstance() throws InfoException {
+	public static KeyStore getInstance() throws StoreException {
 		if (instance == null)
-			throw new InfoException("KeyStore not inialized using KeyStore.setInstance()");
+			throw new StoreException("KeyStore not inialized using KeyStore.setInstance()");
 
 		return instance;
 	}
@@ -49,7 +49,7 @@ public abstract class KeyStore {
 		KeyStore.instance = instance;
 	}
 
-	public abstract PublicKey getPublicKey(IssuerIdentifier issuer, int counter) throws InfoException;
+	public abstract PublicKey getPublicKey(IssuerIdentifier issuer, int counter) throws KeyException;
 
 	public abstract void removePublicKeys(IssuerIdentifier issuer);
 }

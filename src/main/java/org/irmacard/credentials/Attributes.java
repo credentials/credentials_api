@@ -285,14 +285,10 @@ public class Attributes implements Serializable {
 	/**
 	 * Get the {@link CredentialIdentifier} from the metadata attribute of this instance.
 	 * @return Either the identifier, or null if the {@link DescriptionStore} does not contain it.
+	 * @throws StoreException if the {@link DescriptionStore} is not initialized
 	 */
-	public CredentialIdentifier getCredentialIdentifier() {
-		byte[] truncatedHash = getMetadataField(Field.CREDENTIAL_ID);
-		try {
-			return DescriptionStore.getInstance().hashToCredentialIdentifier(truncatedHash);
-		} catch (InfoException e) {
-			throw new RuntimeException(e);
-		}
+	public CredentialIdentifier getCredentialIdentifier() throws StoreException {
+		return DescriptionStore.getInstance().hashToCredentialIdentifier(getMetadataField(Field.CREDENTIAL_ID));
 	}
 
 	/**
@@ -312,14 +308,10 @@ public class Attributes implements Serializable {
 	/**
 	 * Get the {@link CredentialDescription} of this credential, using {@link #getCredentialIdentifier()}
 	 * and the {@link DescriptionStore}.
+	 * @throws StoreException if the {@link DescriptionStore} is not initialized
 	 */
 	public CredentialDescription getCredentialDescription() {
-		CredentialIdentifier identifier = getCredentialIdentifier();
-		try {
-			return DescriptionStore.getInstance().getCredentialDescription(identifier);
-		} catch (InfoException e) {
-			throw new RuntimeException(e);
-		}
+		return DescriptionStore.getInstance().getCredentialDescription(getCredentialIdentifier());
 	}
 
 	/**
@@ -329,21 +321,22 @@ public class Attributes implements Serializable {
 	 * @throws InfoException when the {@link CredentialIdentifier} could not be determined using the metadata attribute;
 	 *                       when the {@link KeyStore} has not been initialized; or when it does not contain the
 	 *                       required public key.
+	 * @throws KeyException when the corresponding public key could not be found.
 	 */
-	public boolean isValidOn(Date date) throws InfoException {
+	public boolean isValidOn(Date date) throws InfoException, KeyException {
 		try {
 			IssuerIdentifier issuer = getCredentialIdentifier().getIssuerIdentifier();
 			PublicKey key = KeyStore.getInstance().getPublicKey(issuer, getKeyCounter());
 			return key.isValidOn(getSigningDate()) && !isExpiredOn(date);
-		} catch (NullPointerException e) {
-			throw new InfoException("Public key not found in store", e);
+		} catch (NullPointerException|StoreException e) {
+			throw new InfoException(e);
 		}
 	}
 
 	/**
 	 * @return {@link #isValidOn(Date)} the current time.
 	 */
-	public boolean isValid() throws InfoException {
+	public boolean isValid() throws InfoException, KeyException {
 		return isValidOn(Calendar.getInstance().getTime());
 	}
 

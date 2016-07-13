@@ -30,7 +30,10 @@
 
 package org.irmacard.credentials.info;
 
-import com.google.api.client.http.*;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import org.apache.commons.codec.binary.Base64;
 
@@ -139,11 +142,16 @@ public class DescriptionStore {
 	 * Get DescriptionStore instance
 	 * 
 	 * @return The DescriptionStore instance
-	 * @throws InfoException if deserializing the store failed
+	 * @throws StoreException if deserializing the store failed
 	 */
-	public static DescriptionStore getInstance() throws InfoException {
-		if(ds == null)
-			initialize();
+	public static DescriptionStore getInstance() throws StoreException {
+		if(ds == null) {
+			try {
+				initialize();
+			} catch (InfoException e) {
+				throw new StoreException(e);
+			}
+		}
 
 		return ds;
 	}
@@ -246,7 +254,7 @@ public class DescriptionStore {
 			if (entry.getSchemeManagerName().equals(name)) {
 				try {
 					KeyStore.getInstance().removePublicKeys(entry);
-				} catch (InfoException e) { /* Ignore, nothing to do */ }
+				} catch (StoreException e) { /* Ignore, nothing to do */ }
 				it.remove();
 			}
 		}
@@ -353,9 +361,9 @@ public class DescriptionStore {
 	 * @throws IOException if the status code is not in the 2XX success range
 	 */
 	public static InputStream doHttpRequest(String url) throws IOException {
-		HttpResponse response = null;
-		response = requestFactory.buildGetRequest(new GenericUrl(url)).execute();
-		return response.getContent();
+		return requestFactory.buildGetRequest(new GenericUrl(url))
+				.execute()
+				.getContent();
 	}
 
 	public static String inputStreamToString(InputStream is) throws IOException {

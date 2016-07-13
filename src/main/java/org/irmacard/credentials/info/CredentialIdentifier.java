@@ -94,10 +94,6 @@ public class CredentialIdentifier extends ObjectIdentifier {
 	}
 
 	public CredentialDescription getCredentialDescription() {
-		try {
-			return DescriptionStore.getInstance().getCredentialDescription(this);
-		} catch (InfoException e) {
-			throw new RuntimeException(e);
-		}
+		return DescriptionStore.getInstance().getCredentialDescription(this);
 	}
 }

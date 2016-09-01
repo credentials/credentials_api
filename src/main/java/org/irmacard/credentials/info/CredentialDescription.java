@@ -42,6 +42,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+@SuppressWarnings("unused")
 public class CredentialDescription extends ConfigurationParser implements Serializable {
 	private static final long serialVersionUID = -8465573145896355885L;
 	private String description;
@@ -49,8 +50,8 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 	private String shortName;
 	private String issuerID;
 	private String credentialID;
-	private String schemeManager;
 	private CredentialIdentifier identifier;
+	private boolean shouldBeSingleton = false;
 
 	private ArrayList<AttributeDescription> attributes;
 	private transient IssuerDescription issuerDescription;
@@ -87,16 +88,22 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 		shortName = getFirstTagText(d, "ShortName");
 		issuerID = getFirstTagText(d, "IssuerID");
 		credentialID = getFirstTagText(d, "CredentialID");
-		schemeManager = getFirstTagText(d, "SchemeManager");
+		String schemeManager = getFirstTagText(d, "SchemeManager");
 
 		identifier = new CredentialIdentifier(new IssuerIdentifier(schemeManager, issuerID), credentialID);
 
 		NodeList attrList = ((Element) d.getElementsByTagName("Attributes")
 				.item(0)).getElementsByTagName("Attribute");
-		attributes = new ArrayList<AttributeDescription>();
+		attributes = new ArrayList<>();
 		for (int i = 0; i < attrList.getLength(); i++) {
-			attributes
-					.add(new AttributeDescription((Element) attrList.item(i)));
+			attributes.add(new AttributeDescription((Element) attrList.item(i)));
+		}
+
+		if (getSchemaVersion() >= 3) {
+			String s = getFirstTagText(d, "ShouldBeSingleton");
+			if (!s.equals("true") && !s.equals("false"))
+				throw new InfoException("ShouldBeSingleton has illegal value, should be true or false");
+			shouldBeSingleton = s.equals("true");
 		}
 	}
 
@@ -120,7 +127,6 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 	/**
 	 * Get the short name of the credential. This name is short, but displayable,
 	 * for example it could be "Student card".
-	 * @return
 	 */
 	public String getShortName() {
 		return shortName;
@@ -141,7 +147,6 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 	 * Get the name of this credential in the directory structure. For example,
 	 * this can be "root" or "ageLower". This should be primarily for internal use
 	 * to locate files in the directory structure.
-	 * @return
 	 */
 	public String getCredentialID() {
 		return credentialID;
@@ -169,7 +174,7 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 	 * @return list of attributes names
 	 */
 	public List<String> getAttributeNames() {
-		List<String> ret = new LinkedList<String>();
+		List<String> ret = new LinkedList<>();
 		for(AttributeDescription a : attributes) {
 			ret.add(a.getName());
 		}
@@ -182,7 +187,7 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 	 * @return list of attributes names
 	 */
 	public List<String> getAttributeDescriptions() {
-		List<String> ret = new LinkedList<String>();
+		List<String> ret = new LinkedList<>();
 		for(AttributeDescription a : attributes) {
 			ret.add(a.getDescription());
 		}
@@ -207,5 +212,13 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 			issuerDescription = getIdentifier().getIssuerIdentifier().getIssuerDescription();
 		}
 		return issuerDescription;
+	}
+
+	/**
+	 * Indicates whether a token is allowed to own instance than one copy of this credential type.
+	 * (Note, however, that this is nowhere enforced, cryptographically or otherwise.)
+	 */
+	public boolean shouldBeSingleton() {
+		return shouldBeSingleton;
 	}
 }

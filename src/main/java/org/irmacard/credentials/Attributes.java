@@ -112,9 +112,11 @@ public class Attributes implements Serializable {
 	 * Create a new instance with the specified attributes. The credential type is extracted from the
 	 * metadata attribute (no. 1), which must be present. The corresponding attribute names are fetched
 	 * from the {@link DescriptionStore}. If an attribute is not present in the hash map, its value
-	 * becoms 0.
+	 * becomes 0.
 	 * @param values The attribute values
-	 * @throws IllegalArgumentException If the metadata attribute was absent, i.e., values.get(1) == null
+	 * @throws IllegalArgumentException If the metadata attribute was absent, i.e., values.get(1) == null,
+	 *                                  or if the credential type is unknown (i.e. not present in the
+	 *                                  DescriptionStore)
 	 */
 	public Attributes(HashMap<Integer, BigInteger> values) throws IllegalArgumentException {
 		if (values.get(1) == null)
@@ -123,7 +125,11 @@ public class Attributes implements Serializable {
 		attributes = new HashMap<>();
 		attributes.put(META_DATA_FIELD, values.get(1).toByteArray());
 
-		List<String> attributeNames = getCredentialDescription().getAttributeNames();
+		CredentialDescription cd = getCredentialDescription();
+		if (cd == null)
+			throw new IllegalArgumentException("Credential type not found in store");
+
+		List<String> attributeNames = cd.getAttributeNames();
 		for (int i = 0; i < attributeNames.size(); ++i) {
 			BigInteger attribute = values.get(i+2);
 			if (attribute != null)
@@ -137,12 +143,22 @@ public class Attributes implements Serializable {
 	 * {@link DescriptionStore}.
 	 * @param values The attribute values, with the metadata attribute at position 1 and the rest of
 	 *               the attributes at position 2 and on.
+	 * @throws IllegalArgumentException If the metadata attribute was absent, i.e., values.get(1) == null,
+	 *                                  or if the credential type is unknown (i.e. not present in the
+	 *                                  DescriptionStore)
 	 */
 	public Attributes(List<BigInteger> values) {
+		if (values.get(1) == null)
+			throw new IllegalArgumentException("Metadata attribute was absent but is compulsory");
+
 		attributes = new HashMap<>();
 		attributes.put(META_DATA_FIELD, values.get(1).toByteArray());
 
-		List<String> attributeNames = getCredentialDescription().getAttributeNames();
+		CredentialDescription cd = getCredentialDescription();
+		if (cd == null)
+			throw new IllegalArgumentException("Credential type not found in store");
+
+		List<String> attributeNames = cd.getAttributeNames();
 		for (int i = 0; i < attributeNames.size(); ++i)
 			attributes.put(attributeNames.get(i), values.get(i+2).toByteArray());
 	}

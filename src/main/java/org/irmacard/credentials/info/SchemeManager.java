@@ -52,6 +52,7 @@ public class SchemeManager extends ConfigurationParser implements Serializable {
 	private String hrName;
 	private String description;
 	private String contact;
+	private String keyshareServer = "";
 
 	public SchemeManager(InputStream stream) throws InfoException {
 		super();
@@ -77,6 +78,10 @@ public class SchemeManager extends ConfigurationParser implements Serializable {
 			description = "";
 			contact = "";
 		}
+
+		if (getSchemaVersion() >= 4) {
+			keyshareServer = getFirstTagText(d, "KeyshareServer");
+		}
 	}
 
 	public String getName() {
@@ -100,6 +105,14 @@ public class SchemeManager extends ConfigurationParser implements Serializable {
 	@SuppressWarnings("unused")
 	public String getContactInfo() {
 		return contact;
+	}
+
+	public String getKeyshareServer() {
+		return keyshareServer;
+	}
+
+	public boolean hasKeyshareServer() {
+		return keyshareServer != null && keyshareServer.length() > 0;
 	}
 
 	public void setUrl(String url) {

@@ -233,6 +233,9 @@ public class DescriptionStore {
 			throw new InfoException("Scheme manager with id " + manager.getName() + " already exists");
 
 		schemeManagers.put(manager.getName(), manager);
+
+		if (serializer != null)
+			serializer.saveSchemeManager(manager);
 	}
 
 	/**
@@ -345,13 +348,7 @@ public class DescriptionStore {
 		if (url.endsWith("/description.xml"))
 			url = url.substring(0, url.length() - "/description.xml".length());
 
-		SchemeManager manager = new SchemeManager(DescriptionStore.doHttpRequest(url + "/description.xml"));
-		addSchemeManager(manager);
-
-		if (serializer != null)
-			serializer.saveSchemeManager(manager);
-
-		return manager;
+		return new SchemeManager(DescriptionStore.doHttpRequest(url + "/description.xml"));
 	}
 
 	/**

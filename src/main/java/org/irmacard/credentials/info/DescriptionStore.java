@@ -233,6 +233,14 @@ public class DescriptionStore {
 			throw new InfoException("Scheme manager with id " + manager.getName() + " already exists");
 
 		schemeManagers.put(manager.getName(), manager);
+	}
+
+	/**
+	 * Add and save a new scheme manager.
+	 * @throws InfoException if the manager already exists
+	 */
+	public void addAndSaveSchemeManager(SchemeManager manager) throws InfoException {
+		addSchemeManager(manager);
 
 		if (serializer != null)
 			serializer.saveSchemeManager(manager);

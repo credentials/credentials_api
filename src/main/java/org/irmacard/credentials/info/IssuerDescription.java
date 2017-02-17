@@ -40,13 +40,14 @@ import org.w3c.dom.Document;
 public class IssuerDescription extends ConfigurationParser implements Serializable {
 	private static final long serialVersionUID = 1640325096236188409L;
 	private String name;
+	private String shortName;
 	private String id;
 	private String contactAddress;
 	private String contactEMail;
 	private String baseURL;
 	private String schemeManager;
 	private IssuerIdentifier identifier;
-	
+
 	/**
 	 * Full human readable name of the issuer. For example this could be "Radboud University".
 	 * @return
@@ -54,7 +55,14 @@ public class IssuerDescription extends ConfigurationParser implements Serializab
 	public String getName() {
 		return name;
 	}
-	
+	/**
+	 * Short human readable name of the issuer. For example this could be "RU".
+	 * @return
+	 */
+	public String getShortName() {
+		return shortName;
+	}
+
 	/**
 	 * Get issuer ID, corresponding to the directory name in the configuration structures.
 	 * @return
@@ -73,7 +81,7 @@ public class IssuerDescription extends ConfigurationParser implements Serializab
 	public String getContactAddress() {
 		return contactAddress;
 	}
-	
+
 	/**
 	 * @return Contact email of the issuer
 	 */
@@ -109,8 +117,13 @@ public class IssuerDescription extends ConfigurationParser implements Serializab
 	}
 
 	private void init(Document d) throws InfoException {
-		name = getFirstTagText(d, "Name");
 		id = getFirstTagText(d, "ID");
+		name = getFirstTagText(d, "Name");
+		if (getSchemaVersion() >= 3)
+			shortName = getFirstTagText(d, "ShortName");
+		else
+			shortName = name;
+
 		contactAddress = getFirstTagText(d, "ContactAddress");
 		contactEMail = getFirstTagText(d, "ContactEMail");
 		baseURL = getFirstTagText(d, "baseURL");

@@ -101,6 +101,10 @@ abstract public class ConfigurationParser {
 		return all.item(0).getTextContent().trim();
 	}
 
+	protected boolean containsTag(Document d, String tag) {
+		return d.getElementsByTagName(tag).getLength() > 0;
+	}
+
 	protected int getSchemaVersion() {
 		return schemaVersion;
 	}

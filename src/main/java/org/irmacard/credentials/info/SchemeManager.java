@@ -54,6 +54,7 @@ public class SchemeManager extends ConfigurationParser implements Serializable {
 	private String contact;
 	private String keyshareServer = "";
 	private String keyshareWebsite = "";
+	private AttributeIdentifier keyshareAttribute;
 
 	public SchemeManager(InputStream stream) throws InfoException {
 		super();
@@ -87,6 +88,13 @@ public class SchemeManager extends ConfigurationParser implements Serializable {
 			keyshareWebsite = getFirstTagText(d, "KeyshareWebsite");
 		} else {
 			keyshareWebsite = keyshareServer;
+		}
+		if (getSchemaVersion() >= 6 && containsTag(d, "KeyshareAttribute")) {
+			try {
+				keyshareAttribute = new AttributeIdentifier(getFirstTagText(d, "KeyshareAttribute"));
+			} catch (IllegalArgumentException e) {
+				throw new InfoException("Tag <keyshareAttribute> was not a valid attribute identifier", e);
+			}
 		}
 	}
 
@@ -123,6 +131,10 @@ public class SchemeManager extends ConfigurationParser implements Serializable {
 
 	public boolean hasKeyshareServer() {
 		return keyshareServer != null && keyshareServer.length() > 0;
+	}
+
+	public AttributeIdentifier getKeyshareAttribute() {
+		return keyshareAttribute;
 	}
 
 	public void setUrl(String url) {

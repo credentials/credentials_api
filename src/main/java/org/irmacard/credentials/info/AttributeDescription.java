@@ -37,24 +37,18 @@ import org.w3c.dom.Element;
 public class AttributeDescription implements Serializable{
 	private static final long serialVersionUID = 4609118645897084209L;
 	private String name;
-	private String description;
+	private TranslatedString hrName;
+	private TranslatedString description;
 
 	AttributeDescription(Element e) {
-		name = ((Element) e.getElementsByTagName("Name").item(0)).getTextContent();
-		description = ((Element) e.getElementsByTagName("Description").item(0)).getTextContent();
-	}
-	
-	/**
-	 * FIXME: constructor for testing
-	 */
-	@Deprecated
-	public AttributeDescription() {
-		name = "CoolAttr";
-		description = "CoolAttr description";
+		name = e.getAttribute("id");
+		hrName = new TranslatedString(e.getElementsByTagName("Name").item(0));
+		description = new TranslatedString(e.getElementsByTagName("Description").item(0));
 	}
 
-	public AttributeDescription(String name, String description) {
+	public AttributeDescription(String name, TranslatedString hrName, TranslatedString description) {
 		this.name = name;
+		this.hrName = hrName;
 		this.description = description;
 	}
 
@@ -65,13 +59,17 @@ public class AttributeDescription implements Serializable{
 		return name;
 	}
 
+	public TranslatedString getHrName() {
+		return hrName;
+	}
+
 	/**
 	 * @return description of the attribute
 	 */
-	public String getDescription() {
+	public TranslatedString getDescription() {
 		return description;
 	}
-	
+
 	public String toString() {
 		return name + ": " + description;
 	}

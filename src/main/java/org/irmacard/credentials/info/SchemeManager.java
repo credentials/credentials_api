@@ -49,8 +49,8 @@ public class SchemeManager extends ConfigurationParser implements Serializable {
 	private transient Document d;
 	private String name;
 	private String url;
-	private String hrName;
-	private String description;
+	private TranslatedString hrName;
+	private TranslatedString description;
 	private String contact;
 	private String keyshareServer = "";
 	private String keyshareWebsite = "";
@@ -67,29 +67,19 @@ public class SchemeManager extends ConfigurationParser implements Serializable {
 	}
 
 	private void init(Document d) throws InfoException {
+		if (getSchemaVersion() < 7)
+			throw new InfoException("Cannot parse schememanager definition of version " + getSchemaVersion());
+
 		this.d = d;
 		name = getFirstTagText(d, "Id");
 		url = getFirstTagText(d, "Url");
+		hrName = getFirstTranslatedTag(d, "Name");
+		description = getFirstTranslatedTag(d, "Description");
+		contact = getFirstTagText(d, "Contact");
+		keyshareServer = getNullableTagText(d, "KeyshareServer");
+		keyshareWebsite = getNullableTagText(d, "KeyshareWebsite");
 
-		if (getSchemaVersion() >= 3) {
-			hrName = getFirstTagText(d, "Name");
-			description = getFirstTagText(d, "Description");
-			contact = getFirstTagText(d, "Contact");
-		} else {
-			hrName = name;
-			description = "";
-			contact = "";
-		}
-
-		if (getSchemaVersion() >= 4) {
-			keyshareServer = getFirstTagText(d, "KeyshareServer");
-		}
-		if (getSchemaVersion() >= 5) {
-			keyshareWebsite = getFirstTagText(d, "KeyshareWebsite");
-		} else {
-			keyshareWebsite = keyshareServer;
-		}
-		if (getSchemaVersion() >= 6 && containsTag(d, "KeyshareAttribute")) {
+		if (containsTag(d, "KeyshareAttribute")) {
 			try {
 				keyshareAttribute = new AttributeIdentifier(getFirstTagText(d, "KeyshareAttribute"));
 			} catch (IllegalArgumentException e) {
@@ -107,12 +97,12 @@ public class SchemeManager extends ConfigurationParser implements Serializable {
 	}
 
 	@SuppressWarnings("unused")
-	public String getHumanReadableName() {
+	public TranslatedString getHumanReadableName() {
 		return hrName;
 	}
 
 	@SuppressWarnings("unused")
-	public String getDescription() {
+	public TranslatedString getDescription() {
 		return description;
 	}
 

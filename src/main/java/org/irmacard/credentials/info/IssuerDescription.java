@@ -39,27 +39,26 @@ import org.w3c.dom.Document;
 
 public class IssuerDescription extends ConfigurationParser implements Serializable {
 	private static final long serialVersionUID = 1640325096236188409L;
-	private String name;
-	private String shortName;
+	private TranslatedString name;
+	private TranslatedString shortName;
 	private String id;
 	private String contactAddress;
 	private String contactEMail;
 	private String baseURL;
-	private String schemeManager;
 	private IssuerIdentifier identifier;
 
 	/**
 	 * Full human readable name of the issuer. For example this could be "Radboud University".
 	 * @return
 	 */
-	public String getName() {
+	public TranslatedString getName() {
 		return name;
 	}
 	/**
 	 * Short human readable name of the issuer. For example this could be "RU".
 	 * @return
 	 */
-	public String getShortName() {
+	public TranslatedString getShortName() {
 		return shortName;
 	}
 
@@ -117,17 +116,17 @@ public class IssuerDescription extends ConfigurationParser implements Serializab
 	}
 
 	private void init(Document d) throws InfoException {
+		if (getSchemaVersion() < 4)
+			throw new InfoException("Cannot parse issuer definition of version " + getSchemaVersion());
+
 		id = getFirstTagText(d, "ID");
-		name = getFirstTagText(d, "Name");
-		if (getSchemaVersion() >= 3)
-			shortName = getFirstTagText(d, "ShortName");
-		else
-			shortName = name;
+		name = getFirstTranslatedTag(d, "Name");
+		shortName = getFirstTranslatedTag(d, "ShortName");
 
 		contactAddress = getFirstTagText(d, "ContactAddress");
 		contactEMail = getFirstTagText(d, "ContactEMail");
 		baseURL = getFirstTagText(d, "baseURL");
-		schemeManager = getFirstTagText(d, "SchemeManager");
+		String schemeManager = getFirstTagText(d, "SchemeManager");
 		identifier = new IssuerIdentifier(schemeManager, id);
 	}
 

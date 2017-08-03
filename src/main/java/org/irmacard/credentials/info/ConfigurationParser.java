@@ -101,6 +101,22 @@ abstract public class ConfigurationParser {
 		return all.item(0).getTextContent().trim();
 	}
 
+	protected String getNullableTagText(Document d, String tag) {
+		NodeList all = d.getElementsByTagName(tag);
+		if (all.item(0) == null) {
+			return null;
+		}
+		return all.item(0).getTextContent().trim();
+	}
+
+	protected TranslatedString getFirstTranslatedTag(Document d, String tag) throws InfoException {
+		NodeList all = d.getElementsByTagName(tag);
+		if (all.getLength() == 0) {
+			throw new InfoException("Expected tag <" + tag + "> is missing.");
+		}
+		return new TranslatedString(all.item(0));
+	}
+
 	protected boolean containsTag(Document d, String tag) {
 		return d.getElementsByTagName(tag).getLength() > 0;
 	}

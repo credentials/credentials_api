@@ -45,9 +45,9 @@ import org.w3c.dom.NodeList;
 @SuppressWarnings("unused")
 public class CredentialDescription extends ConfigurationParser implements Serializable {
 	private static final long serialVersionUID = -8465573145896355885L;
-	private String description;
-	private String name;
-	private String shortName;
+	private TranslatedString description;
+	private TranslatedString name;
+	private TranslatedString shortName;
 	private String issuerID;
 	private String credentialID;
 	private CredentialIdentifier identifier;
@@ -83,9 +83,12 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 	}
 
 	private void init(Document d) throws InfoException {
-		description = getFirstTagText(d, "Description");
-		name = getFirstTagText(d, "Name");
-		shortName = getFirstTagText(d, "ShortName");
+		if (getSchemaVersion() < 4)
+			throw new InfoException("Cannot parse credential definition of version " + getSchemaVersion());
+
+		description = getFirstTranslatedTag(d, "Description");
+		name = getFirstTranslatedTag(d, "Name");
+		shortName = getFirstTranslatedTag(d, "ShortName");
 		issuerID = getFirstTagText(d, "IssuerID");
 		credentialID = getFirstTagText(d, "CredentialID");
 		String schemeManager = getFirstTagText(d, "SchemeManager");
@@ -99,12 +102,11 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 			attributes.add(new AttributeDescription((Element) attrList.item(i)));
 		}
 
-		if (getSchemaVersion() >= 3) {
-			String s = getFirstTagText(d, "ShouldBeSingleton");
-			if (!s.equals("true") && !s.equals("false"))
-				throw new InfoException("ShouldBeSingleton has illegal value, should be true or false");
-			shouldBeSingleton = s.equals("true");
-		}
+		String s = getNullableTagText(d, "ShouldBeSingleton");
+		if (s == null) s = "false";
+		if (!s.equals("true") && !s.equals("false"))
+			throw new InfoException("ShouldBeSingleton has illegal value, should be true or false");
+		shouldBeSingleton = s.equals("true");
 	}
 
 	/**
@@ -120,7 +122,7 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 	 * 
 	 * @return the name of the credential
 	 */
-	public String getName() {
+	public TranslatedString getName() {
 		return name;
 	}
 	
@@ -128,7 +130,7 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 	 * Get the short name of the credential. This name is short, but displayable,
 	 * for example it could be "Student card".
 	 */
-	public String getShortName() {
+	public TranslatedString getShortName() {
 		return shortName;
 	}
 
@@ -164,7 +166,7 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 	 * 
 	 * @return credential description
 	 */
-	public String getDescription() {
+	public TranslatedString getDescription() {
 		return description;
 	}
 
@@ -180,14 +182,14 @@ public class CredentialDescription extends ConfigurationParser implements Serial
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * Get the list of attribute descriptions.
 	 * 
 	 * @return list of attributes names
 	 */
-	public List<String> getAttributeDescriptions() {
-		List<String> ret = new LinkedList<>();
+	public List<TranslatedString> getAttributeDescriptions() {
+		List<TranslatedString> ret = new LinkedList<>();
 		for(AttributeDescription a : attributes) {
 			ret.add(a.getDescription());
 		}

@@ -69,6 +69,9 @@ public class TestBasicParse {
 			System.out.println(cd.getIssuerID());
 			fail("Issuer name incorrect");
 		}
+		if (!cd.getName().getTranslation("en").equals("Lower Age limits")) {
+			fail("Credential name incorrect");
+		}
 	}
 	
 	@Test

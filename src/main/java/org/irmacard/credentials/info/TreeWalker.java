@@ -57,7 +57,7 @@ public class TreeWalker {
 		String[] files = fileReader.list(manager);
 
 		for (String issuerPath : files) {
-			if (issuerPath.startsWith(".") || issuerPath.equals("description.xml"))
+			if (issuerPath.startsWith(".") || fileReader.isEmpty(manager + "/" + issuerPath))
 				continue;
 
 			IssuerIdentifier issuer = new IssuerIdentifier(manager, issuerPath);
@@ -73,7 +73,7 @@ public class TreeWalker {
 				continue;
 
 			for (String credTypePath : credentialTypePaths) {
-				if (credTypePath.startsWith("."))
+				if (credTypePath.startsWith(".") || fileReader.isEmpty(manager + "/" + issuerPath + "/Issues/" + credTypePath))
 					continue;
 				CredentialIdentifier identifier = new CredentialIdentifier(issuer, credTypePath);
 				if (!deserializer.containsCredentialDescription(identifier))

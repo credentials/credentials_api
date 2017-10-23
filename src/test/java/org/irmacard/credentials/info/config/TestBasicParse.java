@@ -44,6 +44,7 @@ public class TestBasicParse {
 
 	URI core = new File(System.getProperty("user.dir")).toURI().resolve(
 			"irma_configuration/");
+
 	URI spec = core.resolve(
 			"irma-demo/Surfnet/Issues/root/description.xml");
 	
@@ -60,6 +61,9 @@ public class TestBasicParse {
 	
 	@Test
 	public void retrieveCredentialInfo() throws InfoException {
+		if (!DescriptionStore.isInitialized())
+			DescriptionStore.initialize(new DescriptionStoreDeserializer(core));
+
 		CredentialDescription cd = DescriptionStore.getInstance()
 				.getCredentialDescriptionByName(schemeManager, "MijnOverheid", "ageLower");
 		if(cd == null) {
@@ -76,6 +80,9 @@ public class TestBasicParse {
 	
 	@Test
 	public void retrieveCredentialDescription() throws InfoException {
+		if (!DescriptionStore.isInitialized())
+			DescriptionStore.initialize(new DescriptionStoreDeserializer(core));
+
 		System.out.println("Retrieve credential test");
 		CredentialDescription cd = DescriptionStore.getInstance()
 				.getCredentialDescriptionByName(schemeManager, "MijnOverheid", "ageLower");

@@ -16,6 +16,10 @@ repositories {
 dependencies {
     compile 'commons-codec:commons-codec:1.10'
     compile 'com.google.http-client:google-http-client:1.20.0'
+    compile 'org.apache.commons:commons-lang3:3.7'
+    compile 'commons-io:commons-io:2.6'
+    compile 'org.bouncycastle:bcprov-jdk15on:1.58'
+    compile 'org.bouncycastle:bcpkix-jdk15on:1.50'
 
     testCompile "junit:junit:4.11"
 }

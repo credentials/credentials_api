@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
 
-version = '0.18.2'
+version = '0.18.3'
 group = 'org.irmacard.credentials'
 
 repositories {
@@ -21,7 +21,6 @@ dependencies {
     compile 'org.bouncycastle:bcprov-jdk15on:1.58'
     compile 'org.bouncycastle:bcpkix-jdk15on:1.50'
 
-    testCompile "junit:junit:4.11"
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {

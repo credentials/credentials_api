@@ -5,6 +5,8 @@ import java.io.StringReader;
 import java.util.Map;
 import java.util.HashMap;
 import java.nio.file.Paths;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Files;
 import java.security.MessageDigest;
@@ -35,18 +37,27 @@ import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.javanet.NetHttpTransport;
 
 public class Updater {
+    static {
+        Security.addProvider(new BouncyCastleProvider());
+    }
+
     public static byte[] download(String url) throws IOException {
         HttpRequestFactory requestFactory = new NetHttpTransport().createRequestFactory();
         HttpRequest request = requestFactory.buildGetRequest(new GenericUrl(url));
         return IOUtils.toByteArray(request.execute().getContent());
     }
 
-    public static boolean Update(String url, String path, String pk)
+    public static boolean update(String url, String path, String pk)
                 throws IOException, VerificationFailedException,
                       IndexParsingException, NoSuchAlgorithmException,
                       InvalidKeySpecException, NoSuchProviderException,
-                       SignatureException, InvalidKeyException {
+                      SignatureException, InvalidKeyException,
+                      URISyntaxException {
+
         boolean changes = false;
+
+        String urlPath = new URI(url).getPath();
+        String name = urlPath.substring(urlPath.lastIndexOf('/') + 1);
 
         // Download index and signature
         byte[] rawIndex = download(url + "/index");
@@ -68,7 +79,7 @@ public class Updater {
 
         // Loop over files
         for (String file : index.keySet()) {
-            Path filePath = Paths.get(path, file);
+            Path filePath = Paths.get(path, name, file);
 
             if (Files.exists(filePath)) {
                 byte[] contents = Files.readAllBytes(filePath);
